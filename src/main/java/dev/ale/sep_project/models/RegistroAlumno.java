@@ -1,0 +1,33 @@
+package dev.ale.sep_project.models;
+
+import java.util.List;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
+public class RegistroAlumno {
+
+    private Long id;
+    
+    @ManyToOne
+    @JoinColumn(name = "alumno_id")
+    private Alumno alumno;
+    
+    @OneToMany(mappedBy = "registroAlumno")
+    private List<Observacion> observaciones;
+    
+    @ManyToOne
+    @JoinColumn(name = "ciclo_grado_id")
+    private CicloGrado cicloGrado;
+}
