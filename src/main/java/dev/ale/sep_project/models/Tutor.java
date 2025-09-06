@@ -4,13 +4,19 @@ import java.util.List;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 @Data
 @EqualsAndHashCode(callSuper = true)
 @Entity
-public class Tutor extends Persona{
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+public class Tutor extends Persona {
     private String telefono;
     private String telAux;
 

@@ -1,7 +1,9 @@
 package dev.ale.sep_project.models;
 
+import java.time.LocalDate;
 import java.util.List;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -35,4 +37,10 @@ public class RegistroAlumno {
     @ManyToOne
     @JoinColumn(name = "ciclo_grado_id")
     private CicloGrado cicloGrado;
+
+    @Column(name = "fecha_inicio")
+    private LocalDate fechaInicio;
+
+    @Column(name = "fecha_fin")
+    private LocalDate fechaFin;
 }
