@@ -6,10 +6,13 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import dev.ale.sep_project.dtos.alumnos.AlumnoCreateDTO;
 import dev.ale.sep_project.dtos.alumnos.AlumnoResponseDTO;
 import dev.ale.sep_project.models.Alumno;
 import dev.ale.sep_project.models.RegistroAlumno;
+import dev.ale.sep_project.models.Tutor;
 import dev.ale.sep_project.repository.AlumnoRepository;
+import dev.ale.sep_project.repository.TutorRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -17,13 +20,30 @@ import lombok.RequiredArgsConstructor;
 public class AlumnoService {
 
     private final AlumnoRepository alumnoRepository;
+    private final TutorRepository tutorRepository;
 
-    public Alumno crearAlumno(Alumno alumno) throws Exception {
-        if (alumnoRepository.findByDni(alumno.getDni()).isPresent()) {
+    public Alumno crearAlumno(AlumnoCreateDTO alumnoDto) throws Exception {
+        if (alumnoRepository.findByDni(alumnoDto.getDni()).isPresent()) {
             throw new Exception("El alumno ya existe");
         }
         try {
-            return alumnoRepository.save(alumno);
+            Alumno alumno = new Alumno();
+            alumno.setNombre(alumnoDto.getNombre());
+            alumno.setApellido(alumnoDto.getApellido());
+            alumno.setDiscapacidad(alumnoDto.isDiscapacidad());
+            alumno.setDetalleDiscap(alumnoDto.getDetalleDiscap());
+            alumno.setDni(alumnoDto.getDni());
+            alumno.setRegistroAlumno(null);
+            for (Long tutorId : alumnoDto.getTutoresIds()) {
+                if (!tutorRepository.existsById(tutorId)) {
+                    throw new Exception("El tutor con ID " + tutorId + " no existe");
+                }
+                // Si el tutor existe, se puede agregar a la lista de tutores del alumno
+                Tutor tutor = tutorRepository.findById(tutorId).orElseThrow(() -> new Exception("El tutor con ID " + tutorId + " no existe"));
+                alumno.getTutores().add(tutor);
+            }
+            alumnoRepository.save(alumno);
+            return alumno;
         } catch (Exception e) {
             throw new Exception("Error al crear el alumno");
         }

@@ -14,6 +14,6 @@ public class AlumnoCreateDTO {
     private String domicilio;
     private boolean discapacidad;
     private String detalleDiscap;
-    // Agregar lista de IDs de tutores
+    // Agregar lista de IDs de tutores, vendrían algo como esto: [1, 4, 3]
     List<Long> tutoresIds;
 }
