@@ -39,7 +39,7 @@ public class RegistroAlumno {
     private CicloGrado cicloGrado;
 
     @Column(name = "fecha_inicio")
-    private LocalDate fechaInicio;
+    private LocalDate fechaInicio = LocalDate.now();
 
     @Column(name = "fecha_fin")
     private LocalDate fechaFin;

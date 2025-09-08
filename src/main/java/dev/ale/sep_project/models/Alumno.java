@@ -26,5 +26,5 @@ public class Alumno extends Persona {
     private Estados estado;
 
     @OneToMany(mappedBy = "alumno")
-    private List<RegistroAlumno> registroAlumno;
+    private List<RegistroAlumno> registroAlumno = new ArrayList<>();
 }

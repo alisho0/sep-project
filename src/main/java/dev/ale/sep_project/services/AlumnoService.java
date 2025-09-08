@@ -22,7 +22,7 @@ public class AlumnoService {
     private final AlumnoRepository alumnoRepository;
     private final TutorRepository tutorRepository;
 
-    public Alumno crearAlumno(AlumnoCreateDTO alumnoDto) throws Exception {
+    public void crearAlumno(AlumnoCreateDTO alumnoDto) throws Exception {
         System.out.println(alumnoDto);
         if (alumnoRepository.findByDni(alumnoDto.getDni()).isPresent()) {
             throw new Exception("El alumno ya existe");
@@ -44,8 +44,15 @@ public class AlumnoService {
                 Tutor tutor = tutorRepository.findById(tutorId).orElseThrow(() -> new Exception("El tutor con ID " + tutorId + " no existe"));
                 alumno.getTutores().add(tutor);
             }
+
+            if (alumno.getRegistroAlumno() == null) {
+                alumno.setRegistroAlumno(new ArrayList<>());
+            }
+            RegistroAlumno registroAlumno  = new RegistroAlumno();
+            registroAlumno.setAlumno(alumno);
+            alumno.getRegistroAlumno().add(registroAlumno);
+            alumnoRepository.save(alumno);
             
-            return alumnoRepository.save(alumno);
         } catch (Exception e) {
             throw new Exception(e.getMessage().toString());
         }
@@ -58,6 +65,7 @@ public class AlumnoService {
             List<AlumnoResponseDTO> alumnosDTO = new ArrayList<>();
 
             for (Alumno alu : alumnos) {
+                // System.out.println(alu.getNombre());
                 RegistroAlumno ultimoRegistro = alu.getRegistroAlumno().stream()
                     .sorted(Comparator.comparing(RegistroAlumno::getFechaInicio).reversed())
                     .findFirst()
@@ -77,7 +85,7 @@ public class AlumnoService {
 
             return alumnosDTO;
         } catch (Exception e) {
-            throw new Exception("Error al obtener los alumnos");
+            throw new Exception(e.getMessage().toString());
         }
     }
 }
