@@ -1,8 +1,11 @@
 package dev.ale.sep_project.services;
 
+import java.util.List;
+
 import org.springframework.stereotype.Service;
 
 import dev.ale.sep_project.dtos.tutor.TutorCreateDTO;
+import dev.ale.sep_project.dtos.tutor.TutorRespuestaDTO;
 import dev.ale.sep_project.models.Tutor;
 import dev.ale.sep_project.repository.TutorRepository;
 import lombok.AllArgsConstructor;
@@ -37,5 +40,21 @@ public class TutorService {
         } catch (Exception e) {
             throw new RuntimeException("Error al crear el tutor");
         }
+    }
+
+    public List<TutorRespuestaDTO> listarTutores() {
+        List<Tutor> tutores = (List<Tutor>) tutorRepository.findAll();
+        return tutores.stream()
+                .map(tutor -> TutorRespuestaDTO.builder()
+                        .id(tutor.getId())
+                        .nombre(tutor.getNombre())
+                        .apellido(tutor.getApellido())
+                        .dni(tutor.getDni())
+                        .tutorDe(tutor.getAlumnos()
+                            .stream()
+                            .map(alumno -> alumno.getNombre() + " " + alumno.getApellido())
+                            .toList())
+                        .build())
+                .toList();
     }
 }

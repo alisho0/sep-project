@@ -23,6 +23,7 @@ public class AlumnoService {
     private final TutorRepository tutorRepository;
 
     public Alumno crearAlumno(AlumnoCreateDTO alumnoDto) throws Exception {
+        System.out.println(alumnoDto);
         if (alumnoRepository.findByDni(alumnoDto.getDni()).isPresent()) {
             throw new Exception("El alumno ya existe");
         }
@@ -30,8 +31,9 @@ public class AlumnoService {
             Alumno alumno = new Alumno();
             alumno.setNombre(alumnoDto.getNombre());
             alumno.setApellido(alumnoDto.getApellido());
-            alumno.setDiscapacidad(alumnoDto.isDiscapacidad());
+            alumno.setDiscapacidad(alumnoDto.getDiscapacidad());
             alumno.setDetalleDiscap(alumnoDto.getDetalleDiscap());
+            alumno.setDomicilio(alumnoDto.getDomicilio());
             alumno.setDni(alumnoDto.getDni());
             alumno.setRegistroAlumno(null);
             for (Long tutorId : alumnoDto.getTutoresIds()) {
@@ -42,10 +44,10 @@ public class AlumnoService {
                 Tutor tutor = tutorRepository.findById(tutorId).orElseThrow(() -> new Exception("El tutor con ID " + tutorId + " no existe"));
                 alumno.getTutores().add(tutor);
             }
-            alumnoRepository.save(alumno);
-            return alumno;
+            
+            return alumnoRepository.save(alumno);
         } catch (Exception e) {
-            throw new Exception("Error al crear el alumno");
+            throw new Exception(e.getMessage().toString());
         }
     }
 

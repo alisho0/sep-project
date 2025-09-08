@@ -1,5 +1,6 @@
 package dev.ale.sep_project.models;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.Entity;
@@ -21,7 +22,7 @@ public class Alumno extends Persona {
         name = "alumno_tutor",
         joinColumns = @JoinColumn(name= "alumno_id"),
         inverseJoinColumns = @JoinColumn(name="tutor_id"))
-    private List<Tutor> tutores;
+    private List<Tutor> tutores = new ArrayList<>();
     private Estados estado;
 
     @OneToMany(mappedBy = "alumno")
