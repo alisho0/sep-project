@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import dev.ale.sep_project.dtos.alumnos.AlumnoCreateDTO;
 import dev.ale.sep_project.dtos.alumnos.AlumnoResponseDTO;
+import dev.ale.sep_project.dtos.alumnos.AlumnoUpdateDTO;
 import dev.ale.sep_project.models.Alumno;
 import dev.ale.sep_project.models.RegistroAlumno;
 import dev.ale.sep_project.models.Tutor;
@@ -84,6 +85,36 @@ public class AlumnoService {
             }
 
             return alumnosDTO;
+        } catch (Exception e) {
+            throw new Exception(e.getMessage().toString());
+        }
+    }
+
+    public void eliminarAlumno(Long id) throws Exception {
+        try {
+            if (!alumnoRepository.existsById(id)) {
+                throw new Exception("El alumno no existe");
+            }
+            alumnoRepository.deleteById(id);
+        } catch (Exception e) {
+            throw new Exception(e.getMessage().toString());
+        }
+    }
+
+    // Creo que puedo utilizar el DTO de creación, tiene la misma estructura, solo habría que sacarle la lista de tutores, o adaptarla para no mandar nada
+    public void actualizarAlumno(Long id, AlumnoUpdateDTO alumnoDto) throws Exception {
+        try {
+            if (!alumnoRepository.existsById(id)) {
+                throw new Exception("El alumno no existe");
+            }
+            Alumno alumno = alumnoRepository.findById(id).orElseThrow(() -> new Exception("El alumno no existe"));
+            alumno.setNombre(alumnoDto.getNombre());
+            alumno.setApellido(alumnoDto.getApellido());
+            alumno.setDiscapacidad(alumnoDto.getDiscapacidad());
+            alumno.setDetalleDiscap(alumnoDto.getDetalleDiscap());
+            alumno.setDomicilio(alumnoDto.getDomicilio());
+            alumno.setDni(alumnoDto.getDni());
+            alumnoRepository.save(alumno);
         } catch (Exception e) {
             throw new Exception(e.getMessage().toString());
         }

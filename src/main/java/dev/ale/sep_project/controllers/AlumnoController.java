@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import dev.ale.sep_project.dtos.alumnos.AlumnoCreateDTO;
 import dev.ale.sep_project.dtos.alumnos.AlumnoResponseDTO;
+import dev.ale.sep_project.dtos.alumnos.AlumnoUpdateDTO;
 import dev.ale.sep_project.models.Alumno;
 import dev.ale.sep_project.services.AlumnoService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+
 
 
 
@@ -45,5 +49,14 @@ public class AlumnoController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al listar alumnos: " + e.getMessage());
         }
     }
-    
+
+    @PutMapping("/actualizar/{id}")
+    public ResponseEntity<?> actualizarAlumno(@PathVariable Long id, @RequestBody AlumnoUpdateDTO alumnoDto) {
+        try {
+            alumnoService.actualizarAlumno(id, alumnoDto);
+            return ResponseEntity.ok("Alumno actualizado correctamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar alumno: " + e.getMessage());
+        }
+    }
 }
