@@ -21,4 +21,10 @@ public class AlumnoCreateDTO {
     private String detalleDiscap;
     // Agregar lista de IDs de tutores, vendrían algo como esto: [1, 4, 3]
     List<Long> tutoresIds;
+
+    // Datos del primer registro 
+    private int anioCicloGrado;
+    private int nroGrado;
+    private String seccionGrado;
+    private String turnoGrado;
 }
