@@ -3,12 +3,15 @@ package dev.ale.sep_project.services;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import dev.ale.sep_project.dtos.alumnos.AlumnoCreateDTO;
+import dev.ale.sep_project.dtos.alumnos.AlumnoDetalleDTO;
 import dev.ale.sep_project.dtos.alumnos.AlumnoResponseDTO;
 import dev.ale.sep_project.dtos.alumnos.AlumnoUpdateDTO;
+import dev.ale.sep_project.dtos.tutor.TutorRespuestaDTO;
 import dev.ale.sep_project.models.Alumno;
 import dev.ale.sep_project.models.CicloGrado;
 import dev.ale.sep_project.models.Grado;
@@ -54,7 +57,8 @@ public class AlumnoService {
                 if (!tutorRepository.existsById(tutorId)) {
                     throw new Exception("El tutor con ID " + tutorId + " no existe");
                 }
-                Tutor tutor = tutorRepository.findById(tutorId).orElseThrow(() -> new Exception("El tutor con ID " + tutorId + " no existe"));
+                Tutor tutor = tutorRepository.findById(tutorId)
+                        .orElseThrow(() -> new Exception("El tutor con ID " + tutorId + " no existe"));
                 alumno.getTutores().add(tutor);
             }
 
@@ -63,30 +67,37 @@ public class AlumnoService {
             registroAlumno.setAlumno(alumno);
 
             // Inicializar CicloGrado y Grado
-            CicloGrado cicloGrado = new CicloGrado();
-            cicloGrado.setAnio(alumnoDto.getAnioCicloGrado());
-            Grado grado = new Grado();
-            grado.setNroGrado(alumnoDto.getNroGrado());
-            grado.setSeccion(alumnoDto.getSeccionGrado());
-            grado.setTurno(alumnoDto.getTurnoGrado());
-            cicloGrado.setGrado(grado);
-            registroAlumno.setCicloGrado(cicloGrado);
 
+            // A futuro optaríamos por la creación de grados desde otro lado, pero por ahora
+            // lo hacemos acá
+            Grado grado = gradoRepository.findByNroGradoAndSeccionAndTurno(
+                    alumnoDto.getNroGrado(),
+                    alumnoDto.getSeccionGrado(),
+                    alumnoDto.getTurnoGrado()).orElseThrow(() -> new Exception("El grado especificado no existe"));
+
+            // Si el ciclo grado no existe, lo creamos por el año y el grado
+            if (!cicloGradoRepository.findByAnio(alumnoDto.getAnioCicloGrado()).isPresent()) {
+                CicloGrado cicloGrado = new CicloGrado();
+                cicloGrado.setAnio(alumnoDto.getAnioCicloGrado());
+                cicloGrado.setGrado(grado);
+                cicloGradoRepository.save(cicloGrado);
+            }
+
+            // Obtenemos el ciclo grado existente
+            CicloGrado cicloGrado = cicloGradoRepository.findByAnio(alumnoDto.getAnioCicloGrado())
+                    .orElseThrow(() -> new Exception("El ciclo grado especificado no existe"));
+
+            registroAlumno.setCicloGrado(cicloGrado);
             // El resto de campos pueden quedar null o con valores por defecto
 
             // Inicializa la lista de registros si es null
             if (alumno.getRegistroAlumno() == null) {
                 alumno.setRegistroAlumno(new ArrayList<>());
             }
-            // Primero guardamos el grado
-            grado = gradoRepository.save(grado);
-            
-            // Luego el ciclo grado que referencia al grado
-            cicloGrado = cicloGradoRepository.save(cicloGrado);
-            
+
             // Después el alumno
             alumno = alumnoRepository.save(alumno);
-            
+
             // Finalmente el registro que referencia tanto al alumno como al ciclo grado
             alumno.getRegistroAlumno().add(registroAlumno);
             registroAlumnoRepository.save(registroAlumno);
@@ -105,18 +116,18 @@ public class AlumnoService {
             for (Alumno alu : alumnos) {
                 System.out.println("El alumno es: " + alu.getNombre() + " " + alu.getApellido());
                 RegistroAlumno ultimoRegistro = alu.getRegistroAlumno().stream()
-                    .sorted(Comparator.comparing(RegistroAlumno::getFechaInicio).reversed())
-                    .findFirst()
-                    .orElseThrow(() -> new Exception("No se encontraron registros"));
+                        .sorted(Comparator.comparing(RegistroAlumno::getFechaInicio).reversed())
+                        .findFirst()
+                        .orElseThrow(() -> new Exception("No se encontraron registros"));
                 System.out.println("El último registro es: " + ultimoRegistro.getFechaInicio());
                 AlumnoResponseDTO alumnoRespuesta = AlumnoResponseDTO.builder()
-                    .nombre(alu.getNombre())
-                    .apellido(alu.getApellido())
-                    .dni(alu.getDni())
-                    .ultGrado(ultimoRegistro.getCicloGrado().getGrado().getNroGrado())
-                    .seccionGrado(ultimoRegistro.getCicloGrado().getGrado().getSeccion())
-                    .turno(ultimoRegistro.getCicloGrado().getGrado().getTurno())
-                    .build();
+                        .nombre(alu.getNombre())
+                        .apellido(alu.getApellido())
+                        .dni(alu.getDni())
+                        .ultGrado(ultimoRegistro.getCicloGrado().getGrado().getNroGrado())
+                        .seccionGrado(ultimoRegistro.getCicloGrado().getGrado().getSeccion())
+                        .turno(ultimoRegistro.getCicloGrado().getGrado().getTurno())
+                        .build();
                 System.out.println("Testeo del dto: " + alumnoRespuesta);
                 alumnosDTO.add(alumnoRespuesta);
             }
@@ -125,6 +136,29 @@ public class AlumnoService {
         } catch (Exception e) {
             throw new Exception(e.getMessage().toString());
         }
+    }
+
+    // Obtiene el detalle de UN alumno
+    public AlumnoDetalleDTO obtenerAlumno(Long id) {
+        Alumno alumno = alumnoRepository.findById(id).orElseThrow(() -> new RuntimeException("El alumno no existe"));
+        return AlumnoDetalleDTO.builder()
+                .id(alumno.getId())
+                .nombre(alumno.getNombre())
+                .apellido(alumno.getApellido())
+                .dni(alumno.getDni())
+                .domicilio(alumno.getDomicilio())
+                .discapacidad(alumno.getDiscapacidad())
+                .detalleDiscap(alumno.getDetalleDiscap())
+                .tutores(alumno.getTutores().stream()
+                        .map(tutor -> TutorRespuestaDTO.builder()
+                                .id(tutor.getId())
+                                .nombre(tutor.getNombre())
+                                .apellido(tutor.getApellido())
+                                .dni(tutor.getDni())
+                                .build())
+                        .collect(Collectors.toList()))
+                .build();
+
     }
 
     public void eliminarAlumno(Long id) throws Exception {
@@ -138,7 +172,8 @@ public class AlumnoService {
         }
     }
 
-    // Creo que puedo utilizar el DTO de creación, tiene la misma estructura, solo habría que sacarle la lista de tutores, o adaptarla para no mandar nada
+    // Creo que puedo utilizar el DTO de creación, tiene la misma estructura, solo
+    // habría que sacarle la lista de tutores, o adaptarla para no mandar nada
     public void actualizarAlumno(Long id, AlumnoUpdateDTO alumnoDto) throws Exception {
         try {
             if (!alumnoRepository.existsById(id)) {

@@ -3,6 +3,7 @@ package dev.ale.sep_project.models;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -15,7 +16,7 @@ import lombok.EqualsAndHashCode;
 @EqualsAndHashCode(callSuper = true)
 @Entity
 public class Alumno extends Persona {
-    private boolean discapacidad;
+    private Boolean discapacidad;
     private String detalleDiscap;
     @ManyToMany
     @JoinTable(
@@ -25,6 +26,6 @@ public class Alumno extends Persona {
     private List<Tutor> tutores = new ArrayList<>();
     private Estados estado;
 
-    @OneToMany(mappedBy = "alumno")
+    @OneToMany(mappedBy = "alumno", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RegistroAlumno> registroAlumno = new ArrayList<>();
 }

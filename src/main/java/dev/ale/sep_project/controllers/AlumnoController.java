@@ -3,6 +3,7 @@ package dev.ale.sep_project.controllers;
 import org.springframework.web.bind.annotation.RestController;
 
 import dev.ale.sep_project.dtos.alumnos.AlumnoCreateDTO;
+import dev.ale.sep_project.dtos.alumnos.AlumnoDetalleDTO;
 import dev.ale.sep_project.dtos.alumnos.AlumnoResponseDTO;
 import dev.ale.sep_project.dtos.alumnos.AlumnoUpdateDTO;
 import dev.ale.sep_project.models.Alumno;
@@ -16,9 +17,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 
@@ -39,6 +43,17 @@ public class AlumnoController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear alumno" + e.getMessage());
         }
     }
+
+    @GetMapping("/detalle/{id}")
+    public ResponseEntity<?> obtenerDetalleAlumno(@PathVariable Long id) {
+        try {
+            AlumnoDetalleDTO alumnoDetalle = alumnoService.obtenerAlumno(id);
+            return ResponseEntity.ok(alumnoDetalle);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al obtener detalle del alumno: " + e.getMessage());
+        }
+    }
+    
     
     @GetMapping("/listar")
     public ResponseEntity<?> listarAlumnos() {
@@ -57,6 +72,16 @@ public class AlumnoController {
             return ResponseEntity.ok("Alumno actualizado correctamente");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar alumno: " + e.getMessage());
+        }
+    }
+    
+    @DeleteMapping("/eliminar/{id}")
+    public ResponseEntity<?> eliminarAlumno(@PathVariable Long id) {
+        try {
+            alumnoService.eliminarAlumno(id);
+            return ResponseEntity.ok("Alumno eliminado correctamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al eliminar alumno: " + e.getMessage());
         }
     }
 }
