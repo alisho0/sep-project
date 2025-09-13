@@ -3,12 +3,14 @@ package dev.ale.sep_project.services;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
 
 import dev.ale.sep_project.exceptions.ResourceNotFoundException;
-
+import dev.ale.sep_project.dtos.observaciones.ObservacionDTO;
 import dev.ale.sep_project.dtos.registros.RegistroCreateDTO;
+import dev.ale.sep_project.dtos.registros.RegistroRespuestaDTO;
 import dev.ale.sep_project.models.Alumno;
 import dev.ale.sep_project.models.CicloGrado;
 import dev.ale.sep_project.models.RegistroAlumno;
@@ -64,5 +66,35 @@ public class RegistroAlumnoService {
     public List<RegistroAlumno> obtenerRegistrosPorAlumno(Long alumnoId) { // Pendiente
         // return registroAlumnoRepository.findByAlumnoId(alumnoId);
         return null;
+    }
+
+    public RegistroRespuestaDTO obtenerDatosRegistro(Long id) {
+        RegistroAlumno registro = registroAlumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Registro", id));
+
+        try {
+            RegistroRespuestaDTO respuestaDTO = RegistroRespuestaDTO.builder()
+                .id(registro.getId())
+                .nroGrado(registro.getCicloGrado().getGrado().getNroGrado())
+                .seccion(registro.getCicloGrado().getGrado().getSeccion())
+                .turno(registro.getCicloGrado().getGrado().getTurno())
+                .anioCiclo(registro.getCicloGrado().getAnio())
+                .fechaInicio(registro.getFechaInicio())
+                .fechaFin(registro.getFechaFin())
+                .observaciones(
+                    registro.getObservaciones()
+                        .stream()
+                        .map(observacion -> ObservacionDTO.builder()
+                            .id(observacion.getId())
+                            .contenido(observacion.getContenido())
+                            .nombreUsuario("John Doe")
+                            .fecha(observacion.getFecha())
+                            .build())
+                        .collect(Collectors.toList()))
+                .build();
+            
+            return respuestaDTO;
+        } catch (Exception e) {
+            throw new RuntimeException("Ocurrió un problema al devolver el registro - " + e.getMessage());
+        }
     }
 }
