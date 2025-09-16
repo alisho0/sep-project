@@ -46,6 +46,7 @@ public class RegistroAlumnoController {
         return ResponseEntity.ok("Registro eliminado correctamente");
     }
 
+    // Analizarlo más adelante
     @PutMapping("/actualizar/{id}")
     public ResponseEntity<String> actualizarRegistro(@PathVariable Long id, @RequestBody RegistroCreateDTO registro) throws Exception {
         // registroAlumnoService.actualizarRegistro(id);

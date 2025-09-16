@@ -28,7 +28,7 @@ public class TutorController {
     @PostMapping("/crear")
     public ResponseEntity<String> createTutor(@RequestBody TutorCreateDTO tutorDTO) {
         Tutor tutor = tutorService.crearTutor(tutorDTO);
-        return ResponseEntity.ok("Tutor creado exitosamente con estos datos: " + tutor.toString());
+        return ResponseEntity.ok("Tutor creado exitosamente");
     }
 
     @GetMapping("/listar")
@@ -37,4 +37,5 @@ public class TutorController {
         return ResponseEntity.ok(tutores);
     }
 
+    // Falta, editar, eliminar y detalle 
 }
