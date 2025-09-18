@@ -11,6 +11,6 @@ public class GradoListaDTO {
     private int grado;
     private String seccion;
     private String turno;
-    private Long año;
-    private Long cantAlumnos;
+
+    // Creo que no van pq es un lío para ahcerlo y mejor hacerlo en cada ciclo del grado individual
 }
