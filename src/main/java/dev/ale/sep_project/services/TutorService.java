@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import dev.ale.sep_project.dtos.tutor.TutorCreateDTO;
+import dev.ale.sep_project.dtos.tutor.TutorDetalleDTO;
 import dev.ale.sep_project.dtos.tutor.TutorRespuestaDTO;
+import dev.ale.sep_project.exceptions.ResourceNotFoundException;
 import dev.ale.sep_project.models.Tutor;
 import dev.ale.sep_project.repository.TutorRepository;
 import lombok.AllArgsConstructor;
@@ -56,5 +58,25 @@ public class TutorService {
                             .toList())
                         .build())
                 .toList();
+    }
+
+    public TutorDetalleDTO obtenerDetalleTutor(Long id) {
+        Tutor tutor = tutorRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Tutor", id));
+        TutorDetalleDTO respuesta = TutorDetalleDTO.builder()
+                .id(tutor.getId())
+                .nombre(tutor.getNombre())
+                .apellido(tutor.getApellido())
+                .dni(tutor.getDni())
+                .domicilio(tutor.getDomicilio())
+                .telefono(tutor.getTelefono())
+                .telAux(tutor.getTelAux())
+                .tutorDe(tutor.getAlumnos()
+                        .stream()
+                        .map(alumno -> alumno.getNombre() + " " + alumno.getApellido() + " (DNI: " + alumno.getDni()
+                                + ")")
+                        .toList())
+                .build();
+        return respuesta;
     }
 }

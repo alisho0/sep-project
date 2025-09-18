@@ -49,4 +49,11 @@ public class ObservacionService {
             .nombreUsuario("John Doe") // TODO: Obtener nombre real del usuario
             .build();
     }
+
+    public void eliminarObservacion(Long id) {
+        Observacion observacion = observacionRepository.findById(id)
+            .orElseThrow(() -> new ResourceNotFoundException("Observación", id));
+
+        observacionRepository.delete(observacion);
+    }
 }
