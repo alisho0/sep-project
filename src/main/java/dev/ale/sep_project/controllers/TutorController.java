@@ -14,10 +14,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import java.util.List;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.PutMapping;
+
 
 
 
@@ -47,4 +50,19 @@ public class TutorController {
     }
     
     // Falta, editar, eliminar y detalle
+    @PutMapping("editar/{id}")
+    public ResponseEntity<?> editarTutor(@PathVariable Long id, @RequestBody TutorCreateDTO tutorEdit) {
+        try {
+            tutorService.modificarTutor(id, tutorEdit);
+            return ResponseEntity.ok("Tutor editado correctamente");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("No se pudo editar el tutor: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/eliminar/{id}")
+    public ResponseEntity<?> borrarTutor(@PathVariable Long id) {
+        tutorService.eliminarTutor(id);
+        return ResponseEntity.ok("Tutor eliminado correctamente");
+    }
 }

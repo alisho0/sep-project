@@ -2,6 +2,8 @@ package dev.ale.sep_project.models;
 
 import java.util.List;
 
+import org.hibernate.annotations.OnDelete;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToMany;
 import lombok.AllArgsConstructor;
@@ -21,5 +23,6 @@ public class Tutor extends Persona {
     private String telAux;
 
     @ManyToMany(mappedBy = "tutores")
+    @OnDelete(action = org.hibernate.annotations.OnDeleteAction.NO_ACTION)
     private List<Alumno> alumnos;
 }
