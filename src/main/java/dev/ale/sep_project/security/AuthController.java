@@ -8,9 +8,11 @@ import dev.ale.sep_project.security.dto.LoginRequest;
 import dev.ale.sep_project.security.dto.RegisterRequest;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 
 
 @RestController
@@ -28,4 +30,10 @@ public class AuthController {
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(authService.register(request));
     }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<AuthResponse> refresh(@RequestHeader(HttpHeaders.AUTHORIZATION) final String authHeader) {
+        return ResponseEntity.ok(authService.refreshToken(authHeader));
+    }
+    
 }

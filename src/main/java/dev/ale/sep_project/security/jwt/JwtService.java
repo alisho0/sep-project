@@ -26,20 +26,25 @@ public class JwtService {
     @Value("${jwt.expiration}")
     private long expiration;
 
-    public String getToken(UserDetails user) {
-        return getToken(new HashMap<>(), user);
+    @Value("${jwt.refresh.expiration}")
+    private long refreshExpiration;
+
+
+    public String generateRefreshToken(final Usuario usuario) {
+        return buildToken(usuario, refreshExpiration);
+    }
+    public String generateToken(final Usuario usuario) {
+        return buildToken(usuario, expiration);
     }
 
-    private String getToken(Map<String, Object> extraClaims, UserDetails user) {
-        Usuario usuario = (Usuario) user;
+    private String buildToken(final Usuario usuario, final long expiration) {
         return Jwts
             .builder()
-            .setClaims(extraClaims)
-            .setSubject(user.getUsername())
+            .setId(usuario.getId().toString())
+            .setSubject(usuario.getUsername())
             .claim("rol", usuario.getRol().name())
-            .claim("user_id", usuario.getId())
             .setIssuedAt(new Date(System.currentTimeMillis()))
-            .setExpiration(new Date(System.currentTimeMillis()+expiration))
+            .setExpiration(new Date(System.currentTimeMillis() + expiration))
             .signWith(getKey(), SignatureAlgorithm.HS256)
             .compact();
     }
@@ -49,35 +54,32 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String getUsernameFromToken(String token) {
-        return getClaim(token, Claims::getSubject);
-    }
-
-    public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = getUsernameFromToken(token);
-        return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+    public boolean isTokenValid(String token, final Usuario usuario) {
+        final String username = extractUsername(token);
+        return (username.equals(usuario.getUsername()) && !isTokenExpired(token));
 
     }
 
-    private Claims getAllClaims(String token) {
-        return Jwts
+    private boolean isTokenExpired(String token) {
+        return extractExpiration(token).before(new Date());
+    }
+
+    private Date extractExpiration(String token) {
+        final Claims jwtToken = Jwts
             .parserBuilder()
             .setSigningKey(getKey())
             .build()
             .parseClaimsJws(token)
             .getBody();
+        return jwtToken.getExpiration();
     }
-
-    public <T> T getClaim(String token, Function<Claims, T> claimsResolver) {
-        final Claims claims = getAllClaims(token);
-        return claimsResolver.apply(claims);
-    }
-
-    private Date getExpiration(String token) {
-        return getClaim(token, Claims::getExpiration);
-    }
-
-    private boolean isTokenExpired(String token) {
-        return getExpiration(token).before(new Date());
+    public String extractUsername(String token) {
+        final Claims jwtToken = Jwts
+            .parserBuilder()
+            .setSigningKey(getKey())
+            .build()
+            .parseClaimsJws(token)
+            .getBody();
+        return jwtToken.getSubject();
     }
 }
