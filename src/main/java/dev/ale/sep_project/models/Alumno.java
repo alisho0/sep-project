@@ -17,13 +17,23 @@ import lombok.EqualsAndHashCode;
 @Entity
 public class Alumno extends Persona {
     private Boolean discapacidad;
+
+    @ManyToMany
+    @JoinTable(
+        name = "alumno_discapacidad",
+        joinColumns = @JoinColumn(name = "alumno_id"),
+        inverseJoinColumns = @JoinColumn(name = "discapacidad_id"))
+    private List<Discapacidad> discapacidades = new ArrayList<>();
+
     private String detalleDiscap;
+
     @ManyToMany
     @JoinTable(
         name = "alumno_tutor",
         joinColumns = @JoinColumn(name= "alumno_id"),
         inverseJoinColumns = @JoinColumn(name="tutor_id"))
     private List<Tutor> tutores = new ArrayList<>();
+    
     private Estados estado;
 
     @OneToMany(mappedBy = "alumno", cascade = CascadeType.ALL, orphanRemoval = true)
