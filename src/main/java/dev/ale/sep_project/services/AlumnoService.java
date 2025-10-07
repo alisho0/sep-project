@@ -121,6 +121,7 @@ public class AlumnoService {
                         .orElseThrow(() -> new Exception("No se encontraron registros"));
                 System.out.println("El último registro es: " + ultimoRegistro.getFechaInicio());
                 AlumnoResponseDTO alumnoRespuesta = AlumnoResponseDTO.builder()
+                        .id(alu.getId())
                         .nombre(alu.getNombre())
                         .apellido(alu.getApellido())
                         .dni(alu.getDni())
