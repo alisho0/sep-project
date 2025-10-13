@@ -1,14 +1,19 @@
 package dev.ale.sep_project.services;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import dev.ale.sep_project.dtos.registros.TutorListaDTO;
 import dev.ale.sep_project.dtos.tutor.TutorCreateDTO;
 import dev.ale.sep_project.dtos.tutor.TutorDetalleDTO;
 import dev.ale.sep_project.dtos.tutor.TutorRespuestaDTO;
 import dev.ale.sep_project.exceptions.BusinessLogicException;
 import dev.ale.sep_project.exceptions.ResourceNotFoundException;
+import dev.ale.sep_project.models.Alumno;
 import dev.ale.sep_project.models.Tutor;
 import dev.ale.sep_project.repository.AlumnoRepository;
 import dev.ale.sep_project.repository.TutorRepository;
@@ -20,6 +25,17 @@ public class TutorService {
     private final TutorRepository tutorRepository;
     private final AlumnoRepository alumnoRepository;
 
+    private Tutor construirTutorDesdeDTO(TutorCreateDTO dto) {
+        Tutor tutor = new Tutor();
+        tutor.setDni(dto.getDni());
+        tutor.setNombre(dto.getNombre());
+        tutor.setApellido(dto.getApellido());
+        tutor.setTelefono(dto.getTelefono());
+        tutor.setDomicilio(dto.getDomicilio());
+        tutor.setTelAux(dto.getTelAux() != null ? dto.getTelAux() : "");
+        tutor.setAlumnos(new ArrayList<>());
+        return tutor;
+    }
     // Métodos del servicio (crear, actualizar, eliminar, buscar, etc.)
     public Tutor crearTutor(TutorCreateDTO tutorDTO) {
         if (tutorRepository.findByDni(tutorDTO.getDni()).isPresent()) {
@@ -28,22 +44,43 @@ public class TutorService {
         }
         // Lógica para crear y guardar el tutor
         try {
-            Tutor tutor = new Tutor();
-            tutor.setDni(tutorDTO.getDni());
-            tutor.setNombre(tutorDTO.getNombre());
-            tutor.setApellido(tutorDTO.getApellido());
-            tutor.setTelefono(tutorDTO.getTelefono());
-            tutor.setDomicilio(tutorDTO.getDomicilio());
-            tutor.setAlumnos(null); // Inicializar la lista de alumnos como null o una lista vacía
-            if (tutorDTO.getTelAux() == null) {
-                tutor.setTelAux("");
-            } else {
-                tutor.setTelAux(tutorDTO.getTelAux());
-            }
+            Tutor tutor = construirTutorDesdeDTO(tutorDTO); // Inicializar la lista de alumnos como null o una lista vacía
             tutorRepository.save(tutor);
             return tutor;
         } catch (Exception e) {
-            throw new RuntimeException("Error al crear el tutor");
+            throw new RuntimeException("Error al crear el tutor" + " - " + e.getMessage());
+        }
+    }
+
+    @Transactional
+    public Tutor crearTutorConAlumno(TutorCreateDTO tutorDTO) {
+        if (tutorRepository.findByDni(tutorDTO.getDni()).isPresent()) {
+            throw new BusinessLogicException("Ya existe un tutor con el DNI: " + tutorDTO.getDni());
+        }
+        try {
+            Tutor tutor = construirTutorDesdeDTO(tutorDTO);
+            
+            // Primero guardamos el tutor
+            tutorRepository.save(tutor);
+
+            if (tutorDTO.getIdAlumno() != null) {
+                var alumno = alumnoRepository.findById(tutorDTO.getIdAlumno())
+                    .orElseThrow(() -> new ResourceNotFoundException("Alumno", tutorDTO.getIdAlumno()));
+                
+                // Establecemos la relación bidireccional
+                tutor.getAlumnos().add(alumno);
+                alumno.getTutores().add(tutor);
+                
+                // Guardamos ambas entidades
+                alumnoRepository.save(alumno);
+                tutorRepository.save(tutor);
+            }
+            
+            return tutor;
+        } catch (ResourceNotFoundException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new BusinessLogicException("Error al crear el tutor: " + e.getMessage());
         }
     }
 
@@ -55,12 +92,35 @@ public class TutorService {
                         .nombre(tutor.getNombre())
                         .apellido(tutor.getApellido())
                         .dni(tutor.getDni())
+                        .telefono(tutor.getTelefono())
+                        .telAux(tutor.getTelAux())
+                        .domicilio(tutor.getDomicilio())
                         .tutorDe(tutor.getAlumnos()
                             .stream()
                             .map(alumno -> alumno.getNombre() + " " + alumno.getApellido())
                             .toList())
                         .build())
                 .toList();
+    }
+
+    public List<TutorListaDTO> listarTutoresPorAlumno(Long id) {
+        Alumno alumno = alumnoRepository.findById(id)   
+            .orElseThrow(() -> new ResourceNotFoundException("Alumno", id));
+        
+        if (alumno.getTutores() == null) {
+            throw new ResourceNotFoundException("No se encontraron los tutores en el alumno");
+        }
+
+        List<TutorListaDTO> tutoresRespuesta = alumno.getTutores().stream()
+            .map(tutor -> TutorListaDTO.builder()
+                .nombre(tutor.getNombre())
+                .apellido(tutor.getApellido())
+                .dni(tutor.getDni())
+                .domicilio(tutor.getDomicilio())
+                .build())
+            .toList();
+        
+        return tutoresRespuesta;
     }
 
     public TutorDetalleDTO obtenerDetalleTutor(Long id) {

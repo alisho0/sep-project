@@ -12,5 +12,8 @@ public class TutorRespuestaDTO {
     private String nombre;
     private String apellido;
     private String dni;
+    private String telefono;
+    private String telAux;
+    private String domicilio;
     List<String> tutorDe; // Nombres de los alumnos a cargo
 }

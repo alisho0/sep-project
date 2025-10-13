@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import dev.ale.sep_project.exceptions.ResourceNotFoundException;
 import dev.ale.sep_project.dtos.observaciones.ObservacionDTO;
+import dev.ale.sep_project.dtos.registros.RegistroAniosDTO;
 import dev.ale.sep_project.dtos.registros.RegistroCreateDTO;
 import dev.ale.sep_project.dtos.registros.RegistroRespuestaDTO;
 import dev.ale.sep_project.models.Alumno;
@@ -95,6 +96,26 @@ public class RegistroAlumnoService {
             return respuestaDTO;
         } catch (Exception e) {
             throw new RuntimeException("Ocurrió un problema al devolver el registro - " + e.getMessage());
+        }
+    }
+
+    public List<RegistroAniosDTO> obtenerAniosDisponibles(Long id) {
+        try {
+            Alumno alumno = alumnoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Alumno", id));
+
+            List<RegistroAlumno> registros = alumno.getRegistroAlumno();
+
+            List<RegistroAniosDTO> listaRespuesta = registros.stream()
+                .map( registro -> RegistroAniosDTO.builder()
+                    .id(registro.getId())
+                    .anio(registro.getCicloGrado().getAnio())
+                    .build())
+                .collect(Collectors.toList());
+
+            return listaRespuesta;
+        } catch (Exception e) {
+            throw new RuntimeException("Ocurrió un problema al devolver los años disponibles - " + e.getMessage());
         }
     }
 }

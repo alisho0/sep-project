@@ -1,17 +1,13 @@
-package dev.ale.sep_project.dtos.tutor;
+package dev.ale.sep_project.dtos.registros;
 
 import lombok.Builder;
 import lombok.Data;
 
 @Data
 @Builder
-public class TutorCreateDTO {
-    private Long idAlumno;
+public class TutorListaDTO {
     private String nombre;
     private String apellido;
     private String dni;
     private String domicilio;
-    
-    private String telefono;
-    private String telAux;
 }

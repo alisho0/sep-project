@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 
 
+
 @RestController
 @RequestMapping("/registro")
 @RequiredArgsConstructor
@@ -37,6 +38,12 @@ public class RegistroAlumnoController {
         RegistroRespuestaDTO respuestaDTO = registroAlumnoService.obtenerDatosRegistro(id);
         return ResponseEntity.ok().body(respuestaDTO);
     }
+
+    @GetMapping("/añosDisponibles/{id}")
+    public ResponseEntity<?> getAniosDisponibles(@PathVariable Long id) {
+        return ResponseEntity.ok().body(registroAlumnoService.obtenerAniosDisponibles(id));
+    }
+    
     
     
     @DeleteMapping("/eliminar/{id}")

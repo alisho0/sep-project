@@ -2,6 +2,7 @@ package dev.ale.sep_project.controllers;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import dev.ale.sep_project.dtos.registros.TutorListaDTO;
 import dev.ale.sep_project.dtos.tutor.TutorCreateDTO;
 import dev.ale.sep_project.dtos.tutor.TutorDetalleDTO;
 import dev.ale.sep_project.dtos.tutor.TutorRespuestaDTO;
@@ -37,9 +38,22 @@ public class TutorController {
         return ResponseEntity.ok("Tutor creado exitosamente");
     }
 
+    @PostMapping("/crearConAlumno")
+    public ResponseEntity<String> createTutorConAlum(@RequestBody TutorCreateDTO tutorDTO) {
+        Tutor tutor = tutorService.crearTutorConAlumno(tutorDTO);
+        return ResponseEntity.ok("Tutor creado exitosamente");
+    }
+
+
     @GetMapping("/listar")
     public ResponseEntity<List<TutorRespuestaDTO>> listarTutors() {
         List<TutorRespuestaDTO> tutores = tutorService.listarTutores();
+        return ResponseEntity.ok(tutores);
+    }
+
+    @GetMapping("/listar/{id}")
+    public ResponseEntity<List<TutorListaDTO>> listarTutoresPorId(@PathVariable Long id) {
+        List<TutorListaDTO> tutores = tutorService.listarTutoresPorAlumno(id);
         return ResponseEntity.ok(tutores);
     }
 
