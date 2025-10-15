@@ -53,7 +53,7 @@ public class TutorService {
     }
 
     @Transactional
-    public Tutor crearTutorConAlumno(TutorCreateDTO tutorDTO) {
+    public TutorListaDTO crearTutorConAlumno(TutorCreateDTO tutorDTO) {
         if (tutorRepository.findByDni(tutorDTO.getDni()).isPresent()) {
             throw new BusinessLogicException("Ya existe un tutor con el DNI: " + tutorDTO.getDni());
         }
@@ -76,7 +76,13 @@ public class TutorService {
                 tutorRepository.save(tutor);
             }
             
-            return tutor;
+            return TutorListaDTO.builder()
+                .id(tutor.getId())
+                .nombre(tutor.getNombre())
+                .apellido(tutor.getApellido())
+                .dni(tutor.getDni())
+                .domicilio(tutor.getDomicilio())
+                .build();
         } catch (ResourceNotFoundException e) {
             throw e;
         } catch (Exception e) {

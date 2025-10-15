@@ -12,6 +12,7 @@ import dev.ale.sep_project.dtos.alumnos.AlumnoCreateDTO;
 import dev.ale.sep_project.dtos.alumnos.AlumnoDetalleDTO;
 import dev.ale.sep_project.dtos.alumnos.AlumnoResponseDTO;
 import dev.ale.sep_project.dtos.alumnos.AlumnoUpdateDTO;
+import dev.ale.sep_project.dtos.registros.TutorListaDTO;
 import dev.ale.sep_project.dtos.tutor.TutorRespuestaDTO;
 import dev.ale.sep_project.models.Alumno;
 import dev.ale.sep_project.models.CicloGrado;
@@ -195,7 +196,7 @@ public class AlumnoService {
         }
     }
 
-    public Tutor agregarTutor(Long alumnoId, Long tutorId) throws Exception {
+    public TutorListaDTO agregarTutor(Long alumnoId, Long tutorId) throws Exception {
         try {
             Alumno alumno = alumnoRepository.findById(alumnoId)
                 .orElseThrow(() -> new Exception("El alumno no existe"));
@@ -212,7 +213,13 @@ public class AlumnoService {
             alumnoRepository.save(alumno);
             tutorRepository.save(tutor);
 
-            return tutor;
+            return TutorListaDTO.builder()
+                .id(tutor.getId())
+                .nombre(tutor.getNombre())
+                .apellido(tutor.getApellido())
+                .dni(tutor.getDni())
+                .domicilio(tutor.getDomicilio())
+                .build();
         } catch (Exception e) {
             throw new Exception("Error al agregar el tutor: " + e.getMessage());
         }

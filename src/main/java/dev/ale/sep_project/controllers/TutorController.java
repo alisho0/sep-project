@@ -39,9 +39,9 @@ public class TutorController {
     }
 
     @PostMapping("/crearConAlumno")
-    public ResponseEntity<String> createTutorConAlum(@RequestBody TutorCreateDTO tutorDTO) {
-        Tutor tutor = tutorService.crearTutorConAlumno(tutorDTO);
-        return ResponseEntity.ok("Tutor creado exitosamente");
+    public ResponseEntity<?> createTutorConAlum(@RequestBody TutorCreateDTO tutorDTO) {
+        TutorListaDTO tutor = tutorService.crearTutorConAlumno(tutorDTO);
+        return ResponseEntity.ok(tutor);
     }
 
 
