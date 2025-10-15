@@ -84,4 +84,14 @@ public class AlumnoController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al eliminar alumno: " + e.getMessage());
         }
     }
+
+    @PutMapping("/asignarTutor/{idAlumno}/{idTutor}")
+    public ResponseEntity<?> asignarTutor(@PathVariable Long idAlumno, @PathVariable Long idTutor) {
+        try {
+            alumnoService.agregarTutor(idAlumno, idTutor);
+            return ResponseEntity.ok("Tutor asignado al alumno correctamente");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al asignar tutor al alumno: " + e.getMessage());
+        }
+    }
 }

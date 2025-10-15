@@ -113,6 +113,7 @@ public class TutorService {
 
         List<TutorListaDTO> tutoresRespuesta = alumno.getTutores().stream()
             .map(tutor -> TutorListaDTO.builder()
+                .id(tutor.getId())
                 .nombre(tutor.getNombre())
                 .apellido(tutor.getApellido())
                 .dni(tutor.getDni())
@@ -174,5 +175,25 @@ public class TutorService {
         }
         
         tutorRepository.deleteById(id);
+    }
+
+    public void desvincularTutorDeAlumno(Long idTutor, Long idAlumno) {
+        Tutor tutor = tutorRepository.findById(idTutor)
+            .orElseThrow(() -> new ResourceNotFoundException("Tutor", idTutor));
+        
+        Alumno alumno = alumnoRepository.findById(idAlumno)
+            .orElseThrow(() -> new ResourceNotFoundException("Alumno", idAlumno));
+        
+        if (!tutor.getAlumnos().contains(alumno)) {
+            throw new BusinessLogicException("El tutor no está vinculado al alumno especificado");
+        }
+        
+        // Remover la relación bidireccional
+        tutor.getAlumnos().remove(alumno);
+        alumno.getTutores().remove(tutor);
+        
+        // Guardar ambas entidades actualizadas
+        tutorRepository.save(tutor);
+        alumnoRepository.save(alumno);
     }
 }

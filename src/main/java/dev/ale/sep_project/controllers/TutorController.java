@@ -79,4 +79,14 @@ public class TutorController {
         tutorService.eliminarTutor(id);
         return ResponseEntity.ok("Tutor eliminado correctamente");
     }
+
+    @DeleteMapping("/desvincular/{idTutor}/{idAlumno}")
+    public ResponseEntity<?> desvincularTutorDeAlumno(@PathVariable Long idTutor, @PathVariable Long idAlumno) {
+        try {
+            tutorService.desvincularTutorDeAlumno(idTutor, idAlumno);
+            return ResponseEntity.ok("Tutor desvinculado del alumno correctamente");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("No se pudo desvincular el tutor del alumno: " + e.getMessage());
+        }
+    }
 }

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import dev.ale.sep_project.dtos.alumnos.AlumnoCreateDTO;
 import dev.ale.sep_project.dtos.alumnos.AlumnoDetalleDTO;
@@ -34,12 +35,13 @@ public class AlumnoService {
     private final GradoRepository gradoRepository;
     private final RegistroAlumnoRepository registroAlumnoRepository;
 
-    public void crearAlumno(AlumnoCreateDTO alumnoDto) throws Exception {
-        System.out.println(alumnoDto);
+    @Transactional
+    public Alumno crearAlumno(AlumnoCreateDTO alumnoDto) throws Exception {
         if (alumnoRepository.findByDni(alumnoDto.getDni()).isPresent()) {
-            throw new Exception("El alumno ya existe");
+            throw new Exception("Ya existe un alumno con el DNI: " + alumnoDto.getDni());
         }
         try {
+            // Crear alumno solo con datos básicos
             Alumno alumno = new Alumno();
             alumno.setNombre(alumnoDto.getNombre());
             alumno.setApellido(alumnoDto.getApellido());
@@ -61,48 +63,12 @@ public class AlumnoService {
                         .orElseThrow(() -> new Exception("El tutor con ID " + tutorId + " no existe"));
                 alumno.getTutores().add(tutor);
             }
-
-            // Crear el primer registro automáticamente con la fecha de creación
-            RegistroAlumno registroAlumno = new RegistroAlumno();
-            registroAlumno.setAlumno(alumno);
-
-            // Inicializar CicloGrado y Grado
-
-            // A futuro optaríamos por la creación de grados desde otro lado, pero por ahora
-            // lo hacemos acá
-            Grado grado = gradoRepository.findByNroGradoAndSeccionAndTurno(
-                    alumnoDto.getNroGrado(),
-                    alumnoDto.getSeccionGrado(),
-                    alumnoDto.getTurnoGrado()).orElseThrow(() -> new Exception("El grado especificado no existe"));
-
-            // Si el ciclo grado no existe, lo creamos por el año y el grado
-            if (!cicloGradoRepository.findByAnio(alumnoDto.getAnioCicloGrado()).isPresent()) {
-                CicloGrado cicloGrado = new CicloGrado();
-                cicloGrado.setAnio(alumnoDto.getAnioCicloGrado());
-                cicloGrado.setGrado(grado);
-                cicloGradoRepository.save(cicloGrado);
-            }
-
-            // Obtenemos el ciclo grado existente
-            CicloGrado cicloGrado = cicloGradoRepository.findByAnio(alumnoDto.getAnioCicloGrado())
-                    .orElseThrow(() -> new Exception("El ciclo grado especificado no existe"));
-
-            registroAlumno.setCicloGrado(cicloGrado);
-            // El resto de campos pueden quedar null o con valores por defecto
-
-            // Inicializa la lista de registros si es null
-            if (alumno.getRegistroAlumno() == null) {
-                alumno.setRegistroAlumno(new ArrayList<>());
-            }
-
-            // Después el alumno
-            alumno = alumnoRepository.save(alumno);
-
+            
             // Finalmente el registro que referencia tanto al alumno como al ciclo grado
-            alumno.getRegistroAlumno().add(registroAlumno);
-            registroAlumnoRepository.save(registroAlumno);
+            alumno = alumnoRepository.save(alumno);
+            return alumno;
         } catch (Exception e) {
-            throw new Exception(e.getMessage().toString());
+            throw new Exception("Error al crear el alumno: " + e.getMessage());
         }
     }
 
@@ -190,6 +156,65 @@ public class AlumnoService {
             alumnoRepository.save(alumno);
         } catch (Exception e) {
             throw new Exception(e.getMessage().toString());
+        }
+    }
+
+    @Transactional
+    public RegistroAlumno crearRegistroAlumno(Long alumnoId, Integer nroGrado, String seccion, String turno, Integer anioCiclo) throws Exception {
+        try {
+            // Buscar alumno
+            Alumno alumno = alumnoRepository.findById(alumnoId)
+                .orElseThrow(() -> new Exception("El alumno no existe"));
+
+            // Buscar o crear grado
+            Grado grado = gradoRepository.findByNroGradoAndSeccionAndTurno(nroGrado, seccion, turno)
+                .orElseThrow(() -> new Exception("El grado especificado no existe"));
+
+            // Buscar o crear ciclo
+            CicloGrado cicloGrado = cicloGradoRepository.findByAnio(anioCiclo)
+                .orElseGet(() -> {
+                    CicloGrado nuevo = new CicloGrado();
+                    nuevo.setAnio(anioCiclo);
+                    nuevo.setGrado(grado);
+                    return cicloGradoRepository.save(nuevo);
+                });
+
+            // Crear registro
+            RegistroAlumno registro = new RegistroAlumno();
+            registro.setAlumno(alumno);
+            registro.setCicloGrado(cicloGrado);
+            
+            // Agregar registro al alumno
+            alumno.getRegistroAlumno().add(registro);
+            
+            // Solo guardamos el alumno, el registro se guarda en cascada
+            alumnoRepository.save(alumno);
+            return registro;
+        } catch (Exception e) {
+            throw new Exception("Error al crear el registro: " + e.getMessage());
+        }
+    }
+
+    public Tutor agregarTutor(Long alumnoId, Long tutorId) throws Exception {
+        try {
+            Alumno alumno = alumnoRepository.findById(alumnoId)
+                .orElseThrow(() -> new Exception("El alumno no existe"));
+            Tutor tutor = tutorRepository.findById(tutorId)
+                .orElseThrow(() -> new Exception("El tutor no existe"));
+
+            if (alumno.getTutores().contains(tutor)) {
+                throw new Exception("El tutor ya está asociado al alumno");
+            }
+
+            alumno.getTutores().add(tutor);
+            tutor.getAlumnos().add(alumno);
+
+            alumnoRepository.save(alumno);
+            tutorRepository.save(tutor);
+
+            return tutor;
+        } catch (Exception e) {
+            throw new Exception("Error al agregar el tutor: " + e.getMessage());
         }
     }
 }
