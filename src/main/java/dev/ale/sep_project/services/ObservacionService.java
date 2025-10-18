@@ -10,6 +10,7 @@ import dev.ale.sep_project.models.Observacion;
 import dev.ale.sep_project.models.RegistroAlumno;
 import dev.ale.sep_project.repository.ObservacionRepository;
 import dev.ale.sep_project.repository.RegistroAlumnoRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -18,7 +19,9 @@ public class ObservacionService {
 
     private final ObservacionRepository observacionRepository;
     private final RegistroAlumnoRepository registroRepository;
+    private final ActividadService actividadService;
 
+    @Transactional
     public void nuevaObservacion(ObservacionCreateDTO observacionDTO) {
         // Validar que existe el registro
         RegistroAlumno registro = registroRepository.findById(observacionDTO.getIdRegistro())
@@ -34,6 +37,9 @@ public class ObservacionService {
         observacion.setFecha(observacionDTO.getFecha());
         observacion.setRegistroAlumno(registro);
         observacion.setUsuario(null); // TODO: Obtener usuario actual cuando implementes autenticación
+
+        // Registro la actividad
+        actividadService.registrarActividad("Nueva observación registrada para " + (registro.getAlumno().getNombre() + " " + registro.getAlumno().getApellido()), "OBSERVACION");
 
         observacionRepository.save(observacion);
     }
