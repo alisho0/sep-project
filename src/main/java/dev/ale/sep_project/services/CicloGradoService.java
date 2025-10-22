@@ -1,5 +1,6 @@
 package dev.ale.sep_project.services;
 
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import dev.ale.sep_project.dtos.grados.CicloCreateDTO;
@@ -53,6 +54,11 @@ public class CicloGradoService {
                 .cantAlumnos(ciclo.getRegistros().size())
                 .build())
             .toList();
+    }
+
+    public List<Long> getCiclosDisponibles() {
+        List<Long> ciclosActuales = cicloGradoRepository.findAniosDisponibles();
+        return ciclosActuales;
     }
 
     public CicloGrado obtenerCiclo(Long cicloId) {

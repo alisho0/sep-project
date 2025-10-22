@@ -57,6 +57,13 @@ public class GradoService {
             .orElseThrow(() -> new ResourceNotFoundException("Grado", id));
     }
 
+    public List<Integer> getGrados() {
+        return gradoRepository.findGradoDisponibles();
+    }
+
+    public List<String> getSecciones() {
+        return gradoRepository.findSeccionesDisponibles();
+    }
     // Aquí podrías agregar más métodos específicos de grado
     // como crear grado, actualizar grado, etc.
 }

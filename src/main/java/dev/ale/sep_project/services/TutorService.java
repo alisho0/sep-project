@@ -37,7 +37,8 @@ public class TutorService {
         return tutor;
     }
     // Métodos del servicio (crear, actualizar, eliminar, buscar, etc.)
-    public Tutor crearTutor(TutorCreateDTO tutorDTO) {
+    @Transactional
+    public TutorListaDTO crearTutor(TutorCreateDTO tutorDTO) {
         if (tutorRepository.findByDni(tutorDTO.getDni()).isPresent()) {
             // Manejar el caso en que el tutor ya existe
             throw new RuntimeException("El tutor ya existe");
@@ -46,7 +47,13 @@ public class TutorService {
         try {
             Tutor tutor = construirTutorDesdeDTO(tutorDTO); // Inicializar la lista de alumnos como null o una lista vacía
             tutorRepository.save(tutor);
-            return tutor;
+            return TutorListaDTO.builder()
+                .id(tutor.getId())
+                .nombre(tutor.getNombre())
+                .apellido(tutor.getApellido())
+                .dni(tutor.getDni())
+                .domicilio(tutor.getDomicilio())
+                .build();
         } catch (Exception e) {
             throw new RuntimeException("Error al crear el tutor" + " - " + e.getMessage());
         }

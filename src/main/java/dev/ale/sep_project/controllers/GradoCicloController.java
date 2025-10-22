@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/ciclo")
@@ -39,5 +40,15 @@ public class GradoCicloController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Hubo un problema al traer el ciclo");
         }
     }
+
+    @GetMapping("/listar")
+    public ResponseEntity<?> listarCiclos() {
+        try {
+            return ResponseEntity.ok(cicloGradoService.getCiclosDisponibles());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Hubo un problema al listar los grados");
+        }
+    }
+    
         
 }
