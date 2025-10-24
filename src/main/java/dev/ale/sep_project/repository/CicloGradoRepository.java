@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
 import dev.ale.sep_project.models.CicloGrado;
+import dev.ale.sep_project.models.Grado;
 
 public interface CicloGradoRepository extends CrudRepository<CicloGrado, Long> {
 
@@ -14,5 +15,9 @@ public interface CicloGradoRepository extends CrudRepository<CicloGrado, Long> {
 
     @Query("SELECT DISTINCT c.anio FROM CicloGrado c ORDER BY c.anio DESC")
     List<Long> findAniosDisponibles();
+
+    Optional<CicloGrado> findByAnioAndGrado(int anio, Grado grado);
+
+    boolean existsByAnioAndGrado(int anio, Grado grado);
 
 }

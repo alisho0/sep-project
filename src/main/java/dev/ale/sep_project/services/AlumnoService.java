@@ -35,9 +35,11 @@ public class AlumnoService {
     private final CicloGradoRepository cicloGradoRepository;
     private final GradoRepository gradoRepository;
     private final RegistroAlumnoRepository registroAlumnoRepository;
+    private final GradoService gradoService;
+    private final CicloGradoService cicloGradoService;
 
     @Transactional
-    public Alumno crearAlumno(AlumnoCreateDTO alumnoDto) throws Exception {
+    public AlumnoResponseDTO crearAlumno(AlumnoCreateDTO alumnoDto) throws Exception {
         if (alumnoRepository.findByDni(alumnoDto.getDni()).isPresent()) {
             throw new Exception("Ya existe un alumno con el DNI: " + alumnoDto.getDni());
         }
@@ -66,8 +68,43 @@ public class AlumnoService {
             }
             
             // Finalmente el registro que referencia tanto al alumno como al ciclo grado
-            alumno = alumnoRepository.save(alumno);
-            return alumno;
+
+            // 1. Partimos por el registro
+            RegistroAlumno primerRegistro = new RegistroAlumno();
+
+            if (!gradoService.existeGrado(alumnoDto.getNroGrado(), alumnoDto.getSeccionGrado(), alumnoDto.getTurnoGrado())) {
+                throw new Exception("No existe el grado enviado");
+            }
+            // traemos el grado
+            Grado grado = gradoService.getGradoByNroSeccionTurno(alumnoDto.getNroGrado(), alumnoDto.getSeccionGrado(), alumnoDto.getTurnoGrado());
+
+            if (!cicloGradoService.existeCicloGrado(alumnoDto.getAnioCicloGrado(), grado)) {
+                throw new Exception("No existe el ciclo grado enviado");
+            }
+
+            CicloGrado ciclo = cicloGradoService.getCicloGrado(alumnoDto.getAnioCicloGrado(), grado);
+            primerRegistro.setCicloGrado(ciclo);
+            primerRegistro.setAlumno(alumno);
+
+            registroAlumnoRepository.save(primerRegistro);
+            alumno.getRegistroAlumno().add(primerRegistro);
+            
+            alumnoRepository.save(alumno);
+            
+            RegistroAlumno ultimoRegistro = alumno.getRegistroAlumno().stream()
+                .sorted(Comparator.comparing(RegistroAlumno::getFechaInicio).reversed())
+                .findFirst()
+                .orElseThrow(() -> new Exception("No se encontraron registros"));
+
+            return AlumnoResponseDTO.builder()
+                .id(alumno.getId())
+                .nombre(alumno.getNombre())
+                .apellido(alumno.getApellido())
+                .dni(alumno.getDni())
+                .seccionGrado(ultimoRegistro.getCicloGrado().getGrado().getSeccion() != null ? ultimoRegistro.getCicloGrado().getGrado().getSeccion() : "Sin sección")
+                .turno(ultimoRegistro.getCicloGrado().getGrado().getTurno() != null ? ultimoRegistro.getCicloGrado().getGrado().getTurno() : "Sin turno")
+                .ultGrado(ultimoRegistro.getCicloGrado().getGrado().getNroGrado() != 0 ? ultimoRegistro.getCicloGrado().getGrado().getNroGrado() : 0)
+                .build();
         } catch (Exception e) {
             throw new Exception("Error al crear el alumno: " + e.getMessage());
         }
@@ -129,14 +166,29 @@ public class AlumnoService {
 
     }
 
+    @Transactional
     public void eliminarAlumno(Long id) throws Exception {
         try {
-            if (!alumnoRepository.existsById(id)) {
-                throw new Exception("El alumno no existe");
+            Alumno alumno = alumnoRepository.findById(id)
+                .orElseThrow(() -> new Exception("El alumno no existe"));
+
+            // 1. Remover referencias de tutores
+            for (Tutor tutor : alumno.getTutores()) {
+                tutor.getAlumnos().remove(alumno);
+                tutorRepository.save(tutor);
             }
-            alumnoRepository.deleteById(id);
+            alumno.getTutores().clear();
+
+            // 2. Remover los registros del alumno (si tienes cascade, esto no es necesario)
+            alumno.getRegistroAlumno().clear();
+            
+            // 3. Guardar el alumno sin sus relaciones
+            alumnoRepository.save(alumno);
+            
+            // 4. Ahora sí podemos eliminar el alumno
+            alumnoRepository.delete(alumno);
         } catch (Exception e) {
-            throw new Exception(e.getMessage().toString());
+            throw new Exception("Error al eliminar el alumno: " + e.getMessage());
         }
     }
 
@@ -168,8 +220,7 @@ public class AlumnoService {
                 .orElseThrow(() -> new Exception("El alumno no existe"));
 
             // Buscar o crear grado
-            Grado grado = gradoRepository.findByNroGradoAndSeccionAndTurno(nroGrado, seccion, turno)
-                .orElseThrow(() -> new Exception("El grado especificado no existe"));
+            Grado grado = gradoService.getGradoByNroSeccionTurno(nroGrado, seccion, turno);
 
             // Buscar o crear ciclo
             CicloGrado cicloGrado = cicloGradoRepository.findByAnio(anioCiclo)

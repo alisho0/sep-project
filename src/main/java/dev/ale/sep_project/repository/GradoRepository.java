@@ -12,6 +12,8 @@ public interface GradoRepository extends CrudRepository<Grado, Long> {
 
     Optional<Grado> findByNroGradoAndSeccionAndTurno(int nroGrado, String seccionGrado, String turnoGrado);
 
+    boolean existsByNroGradoAndSeccionAndTurno(int nroGrado, String seccionGrado, String turnoGrado);
+
     @Query("SELECT DISTINCT g.nroGrado FROM Grado g ORDER BY g.nroGrado DESC")
     List<Integer> findGradoDisponibles();
 

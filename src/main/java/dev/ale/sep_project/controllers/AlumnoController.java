@@ -37,8 +37,8 @@ public class AlumnoController {
     @PostMapping("/crear")
     public ResponseEntity<?> crearAlumno(@RequestBody AlumnoCreateDTO alumno) {
         try {
-            alumnoService.crearAlumno(alumno);
-            return ResponseEntity.ok("Alumno creado correctamente");
+            AlumnoResponseDTO alu = alumnoService.crearAlumno(alumno);
+            return ResponseEntity.status(HttpStatus.CREATED).body(alu);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear alumno" + e.getMessage());
         }

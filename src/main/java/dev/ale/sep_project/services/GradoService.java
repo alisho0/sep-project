@@ -64,6 +64,16 @@ public class GradoService {
     public List<String> getSecciones() {
         return gradoRepository.findSeccionesDisponibles();
     }
+
+    public boolean existeGrado(int nroGrado, String seccion, String turno) {
+        return gradoRepository.existsByNroGradoAndSeccionAndTurno(nroGrado, seccion, turno);
+    }
+
+    public Grado getGradoByNroSeccionTurno(int nroGrado, String seccion, String turno) {
+        Grado grado = gradoRepository.findByNroGradoAndSeccionAndTurno(nroGrado, seccion, turno)
+            .orElseThrow(() -> new ResourceNotFoundException("No se encontró el grado"));
+        return grado;
+    }
     // Aquí podrías agregar más métodos específicos de grado
     // como crear grado, actualizar grado, etc.
 }

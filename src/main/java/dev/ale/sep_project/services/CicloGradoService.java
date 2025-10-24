@@ -75,4 +75,14 @@ public class CicloGradoService {
         }
         // Más lógica de finalización...
     }
+
+    public CicloGrado getCicloGrado(int anio, Grado grado) {
+        CicloGrado cicloGrado = cicloGradoRepository.findByAnioAndGrado(anio, grado)
+            .orElseThrow(() -> new ResourceNotFoundException("No se encontró el ciclo grado"));
+        return cicloGrado;
+    }
+
+    public boolean existeCicloGrado(int anio, Grado grado) {
+        return cicloGradoRepository.existsByAnioAndGrado(anio, grado);
+    }
 }
