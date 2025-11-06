@@ -12,6 +12,8 @@ import dev.ale.sep_project.services.CicloGradoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestParam;
+
 
 
 
@@ -47,6 +49,15 @@ public class GradoCicloController {
             return ResponseEntity.ok(cicloGradoService.getCiclosDisponibles());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Hubo un problema al listar los grados");
+        }
+    }
+    
+    @GetMapping("/disponibles")
+    public ResponseEntity<?> listarDisponibles() {
+        try {
+            return ResponseEntity.ok(cicloGradoService.getCiclosGradoDisponible());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Hubo un problema al listar los ciclos disponibles");
         }
     }
     

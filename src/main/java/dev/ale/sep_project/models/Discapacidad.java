@@ -21,8 +21,8 @@ public class Discapacidad {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Enumerated(EnumType.STRING)
-    private Discapacidades nombre;
+    
+    private String nombre;
 
     // A futuro plantear detalles de la discapacidad 
 }

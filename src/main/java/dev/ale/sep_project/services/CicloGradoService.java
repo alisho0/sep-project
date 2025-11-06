@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import dev.ale.sep_project.dtos.grados.CicloCreateDTO;
+import dev.ale.sep_project.dtos.grados.CiclosGradoDTO;
 import dev.ale.sep_project.dtos.grados.GradoCiclosDTO;
 import dev.ale.sep_project.exceptions.BusinessLogicException;
 import dev.ale.sep_project.exceptions.ResourceNotFoundException;
@@ -84,5 +85,19 @@ public class CicloGradoService {
 
     public boolean existeCicloGrado(int anio, Grado grado) {
         return cicloGradoRepository.existsByAnioAndGrado(anio, grado);
+    }
+
+    public List<CiclosGradoDTO> getCiclosGradoDisponible() {
+        List<CicloGrado> ciclosGrados = (List<CicloGrado>) cicloGradoRepository.findAll();
+
+        return ciclosGrados.stream()
+            .map(ciclo -> CiclosGradoDTO.builder()
+                .id(ciclo.getId())
+                .grado(ciclo.getGrado().getNroGrado())
+                .seccion(ciclo.getGrado().getSeccion())
+                .turno(ciclo.getGrado().getTurno())
+                .anio(ciclo.getAnio())
+                .build())
+            .toList();
     }
 }
