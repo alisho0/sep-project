@@ -75,9 +75,9 @@ public class RegistroAlumnoService {
         try {
             RegistroRespuestaDTO respuestaDTO = RegistroRespuestaDTO.builder()
                 .id(registro.getId())
-                .nroGrado(registro.getCicloGrado().getGrado().getNroGrado())
-                .seccion(registro.getCicloGrado().getGrado().getSeccion())
-                .turno(registro.getCicloGrado().getGrado().getTurno())
+                .nroGrado(registro.getCicloGrado().getGradoSeccionTurno().getGrado().getNroGrado())
+                .seccion(registro.getCicloGrado().getGradoSeccionTurno().getSeccion().getLetra())
+                .turno(registro.getCicloGrado().getGradoSeccionTurno().getTurno().getNombreTurno())
                 .anioCiclo(registro.getCicloGrado().getAnio())
                 .fechaInicio(registro.getFechaInicio())
                 .fechaFin(registro.getFechaFin())

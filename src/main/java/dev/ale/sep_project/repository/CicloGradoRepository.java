@@ -3,6 +3,7 @@ package dev.ale.sep_project.repository;
 import java.util.List;
 import java.util.Optional;
 
+import dev.ale.sep_project.models.GradoSeccionTurno;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
@@ -16,8 +17,9 @@ public interface CicloGradoRepository extends CrudRepository<CicloGrado, Long> {
     @Query("SELECT DISTINCT c.anio FROM CicloGrado c ORDER BY c.anio DESC")
     List<Long> findAniosDisponibles();
 
-    Optional<CicloGrado> findByAnioAndGrado(int anio, Grado grado);
+    Optional<CicloGrado> findByAnioAndGradoSeccionTurno(int anio, GradoSeccionTurno grado);
 
-    boolean existsByAnioAndGrado(int anio, Grado grado);
+    boolean existsByAnioAndGradoSeccionTurno(int anio, GradoSeccionTurno grado);
 
+    List<CicloGrado> findByGradoSeccionTurno_Grado_NroGrado(int nroGrado);
 }

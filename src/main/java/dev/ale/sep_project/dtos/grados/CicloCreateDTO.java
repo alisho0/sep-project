@@ -5,5 +5,5 @@ import lombok.Data;
 @Data
 public class CicloCreateDTO {
     private int anio;
-    private Long id_grado;
+    private Long id_grado_seccion_grado;
 }

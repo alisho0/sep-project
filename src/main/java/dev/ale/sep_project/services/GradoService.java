@@ -1,7 +1,16 @@
 package dev.ale.sep_project.services;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import dev.ale.sep_project.dtos.grados.CiclosInfoDTO;
+import dev.ale.sep_project.models.CicloGrado;
+import dev.ale.sep_project.models.GradoSeccionTurno;
+import dev.ale.sep_project.models.Seccion;
+import dev.ale.sep_project.repository.CicloGradoRepository;
+import dev.ale.sep_project.repository.GradoSeccionTurnoRepository;
+import dev.ale.sep_project.repository.SeccionRepository;
 import org.springframework.stereotype.Service;
 
 import dev.ale.sep_project.dtos.grados.GradoDetalleDTO;
@@ -15,24 +24,38 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class GradoService {
     private final GradoRepository gradoRepository;
+    private final SeccionRepository seccionRepository;
+    private final GradoSeccionTurnoRepository gradoSeccionTurnoRepository;
+    private final CicloGradoRepository cicloGradoRepository;
     private final CicloGradoService cicloGradoService;  // Inyectamos el servicio de ciclos
 
     public List<GradoListaDTO> listarGrados() {
-        List<Grado> grados = (List<Grado>) gradoRepository.findAll();
+        List<Integer> grados = getGrados(); // ej. [1, 2, 3, ..., 47]
+        List<GradoListaDTO> resultado = new ArrayList<>();
 
-        if (grados.isEmpty()) {
-            throw new ResourceNotFoundException("No se encontraron los grados");
+        for (Integer nroGrado : grados) {
+            List<CicloGrado> ciclos = cicloGradoRepository.findByGradoSeccionTurno_Grado_NroGrado(nroGrado);
+
+            List<CiclosInfoDTO> ciclosDTO = ciclos.stream()
+                    .map(ciclo -> new CiclosInfoDTO(
+                            ciclo.getId(),
+                            ciclo.getAnio(),
+                            ciclo.getRegistros().size()
+                    ))
+                    .collect(Collectors.toList());
+
+            GradoListaDTO dto = GradoListaDTO.builder()
+                    .grado(nroGrado)
+                    .ciclos(ciclosDTO)
+                    .build();
+            // Si tenés un id de grado, lo podés setear también:
+            // dto.setId(gradoRepository.getIdPorNroGrado(nroGrado));
+
+            resultado.add(dto);
         }
-        
-        return grados.stream()
-            .map(grado -> GradoListaDTO.builder()
-                .grado(grado.getNroGrado())
-                .seccion(grado.getSeccion())
-                .turno(grado.getTurno())
-                .id(grado.getId())
-                .build())
-            .toList();
+        return resultado;
     }
+
 
     public GradoDetalleDTO detalleGrado(Long id) {
         Grado grado = gradoRepository.findById(id)
@@ -40,8 +63,6 @@ public class GradoService {
         
         GradoListaDTO gradoDto = GradoListaDTO.builder()
             .id(grado.getId())
-            .seccion(grado.getSeccion())
-            .turno(grado.getTurno())
             .grado(grado.getNroGrado())
             .build();
         
@@ -58,19 +79,19 @@ public class GradoService {
     }
 
     public List<Integer> getGrados() {
-        return gradoRepository.findGradoDisponibles();
+        return gradoRepository.findByNroGradoDesc();
     }
 
     public List<String> getSecciones() {
-        return gradoRepository.findSeccionesDisponibles();
+        return seccionRepository.findSeccionesDisponibles();
     }
 
     public boolean existeGrado(int nroGrado, String seccion, String turno) {
-        return gradoRepository.existsByNroGradoAndSeccionAndTurno(nroGrado, seccion, turno);
+        return gradoSeccionTurnoRepository.existsByGrado_NroGradoAndSeccion_LetraAndTurno_NombreTurno(nroGrado, seccion, turno);
     }
 
-    public Grado getGradoByNroSeccionTurno(int nroGrado, String seccion, String turno) {
-        Grado grado = gradoRepository.findByNroGradoAndSeccionAndTurno(nroGrado, seccion, turno)
+    public GradoSeccionTurno getGradoByNroSeccionTurno(int nroGrado, String seccion, String turno) {
+        GradoSeccionTurno grado = gradoSeccionTurnoRepository.findByGrado_NroGradoAndSeccion_LetraAndTurno_NombreTurno(nroGrado, seccion, turno)
             .orElseThrow(() -> new ResourceNotFoundException("No se encontró el grado"));
         return grado;
     }

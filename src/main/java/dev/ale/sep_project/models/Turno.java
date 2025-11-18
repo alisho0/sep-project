@@ -1,25 +1,24 @@
 package dev.ale.sep_project.models;
 
-import java.util.List;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Entity(name = "grado")
+import java.util.List;
+
+@Entity(name = "turno")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Grado {
+public class Turno {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(unique = true)
-    private int nroGrado;
-
-    @OneToMany(mappedBy = "grado")
+    private String nombreTurno;
+    @OneToMany(mappedBy = "turno")
     private List<GradoSeccionTurno> combinaciones;
 }

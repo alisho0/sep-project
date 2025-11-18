@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import dev.ale.sep_project.models.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,11 +15,6 @@ import dev.ale.sep_project.dtos.alumnos.AlumnoResponseDTO;
 import dev.ale.sep_project.dtos.alumnos.AlumnoUpdateDTO;
 import dev.ale.sep_project.dtos.registros.TutorListaDTO;
 import dev.ale.sep_project.dtos.tutor.TutorRespuestaDTO;
-import dev.ale.sep_project.models.Alumno;
-import dev.ale.sep_project.models.CicloGrado;
-import dev.ale.sep_project.models.Grado;
-import dev.ale.sep_project.models.RegistroAlumno;
-import dev.ale.sep_project.models.Tutor;
 import dev.ale.sep_project.repository.AlumnoRepository;
 import dev.ale.sep_project.repository.CicloGradoRepository;
 import dev.ale.sep_project.repository.GradoRepository;
@@ -76,7 +72,7 @@ public class AlumnoService {
                 throw new Exception("No existe el grado enviado");
             }
             // traemos el grado
-            Grado grado = gradoService.getGradoByNroSeccionTurno(alumnoDto.getNroGrado(), alumnoDto.getSeccionGrado(), alumnoDto.getTurnoGrado());
+            GradoSeccionTurno grado = gradoService.getGradoByNroSeccionTurno(alumnoDto.getNroGrado(), alumnoDto.getSeccionGrado(), alumnoDto.getTurnoGrado());
 
             if (!cicloGradoService.existeCicloGrado(alumnoDto.getAnioCicloGrado(), grado)) {
                 throw new Exception("No existe el ciclo grado enviado");
@@ -101,9 +97,9 @@ public class AlumnoService {
                 .nombre(alumno.getNombre())
                 .apellido(alumno.getApellido())
                 .dni(alumno.getDni())
-                .seccionGrado(ultimoRegistro.getCicloGrado().getGrado().getSeccion() != null ? ultimoRegistro.getCicloGrado().getGrado().getSeccion() : "Sin sección")
-                .turno(ultimoRegistro.getCicloGrado().getGrado().getTurno() != null ? ultimoRegistro.getCicloGrado().getGrado().getTurno() : "Sin turno")
-                .ultGrado(ultimoRegistro.getCicloGrado().getGrado().getNroGrado() != 0 ? ultimoRegistro.getCicloGrado().getGrado().getNroGrado() : 0)
+                .seccionGrado(ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getSeccion().getLetra() != null ? ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getSeccion().getLetra() : "Sin sección")
+                .turno(ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getTurno().getNombreTurno() != null ? ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getTurno().getNombreTurno() : "Sin turno")
+                .ultGrado(ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getGrado().getNroGrado() != 0 ? ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getGrado().getNroGrado() : 0)
                 .build();
         } catch (Exception e) {
             throw new Exception("Error al crear el alumno: " + e.getMessage());
@@ -129,9 +125,9 @@ public class AlumnoService {
                         .nombre(alu.getNombre())
                         .apellido(alu.getApellido())
                         .dni(alu.getDni())
-                        .ultGrado(ultimoRegistro.getCicloGrado().getGrado().getNroGrado())
-                        .seccionGrado(ultimoRegistro.getCicloGrado().getGrado().getSeccion())
-                        .turno(ultimoRegistro.getCicloGrado().getGrado().getTurno())
+                        .ultGrado(ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getGrado().getNroGrado())
+                        .seccionGrado(ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getSeccion().getLetra())
+                        .turno(ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getTurno().getNombreTurno())
                         .build();
                 System.out.println("Testeo del dto: " + alumnoRespuesta);
                 alumnosDTO.add(alumnoRespuesta);
@@ -220,14 +216,14 @@ public class AlumnoService {
                 .orElseThrow(() -> new Exception("El alumno no existe"));
 
             // Buscar o crear grado
-            Grado grado = gradoService.getGradoByNroSeccionTurno(nroGrado, seccion, turno);
+            GradoSeccionTurno grado = gradoService.getGradoByNroSeccionTurno(nroGrado, seccion, turno);
 
             // Buscar o crear ciclo
             CicloGrado cicloGrado = cicloGradoRepository.findByAnio(anioCiclo)
                 .orElseGet(() -> {
                     CicloGrado nuevo = new CicloGrado();
                     nuevo.setAnio(anioCiclo);
-                    nuevo.setGrado(grado);
+                    nuevo.setGradoSeccionTurno(grado);
                     return cicloGradoRepository.save(nuevo);
                 });
 

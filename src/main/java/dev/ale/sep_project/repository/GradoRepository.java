@@ -9,14 +9,7 @@ import org.springframework.data.repository.CrudRepository;
 import dev.ale.sep_project.models.Grado;
 
 public interface GradoRepository extends CrudRepository<Grado, Long> {
-
-    Optional<Grado> findByNroGradoAndSeccionAndTurno(int nroGrado, String seccionGrado, String turnoGrado);
-
-    boolean existsByNroGradoAndSeccionAndTurno(int nroGrado, String seccionGrado, String turnoGrado);
-
-    @Query("SELECT DISTINCT g.nroGrado FROM Grado g ORDER BY g.nroGrado DESC")
-    List<Integer> findGradoDisponibles();
-
-    @Query("SELECT DISTINCT g.seccion FROM Grado g ORDER BY g.seccion DESC")
-    List<String> findSeccionesDisponibles();
+    @Query("SELECT DISTINCT g.nroGrado FROM grado g ORDER BY g.nroGrado DESC")
+    List<Integer> findByNroGradoDesc();
+    Optional<Grado> findByNroGrado(int nroGrado);
 }

@@ -1,7 +1,9 @@
 package dev.ale.sep_project.services;
 
-import java.util.ArrayList;
 import java.util.List;
+
+import dev.ale.sep_project.models.GradoSeccionTurno;
+import dev.ale.sep_project.repository.GradoSeccionTurnoRepository;
 import org.springframework.stereotype.Service;
 import dev.ale.sep_project.dtos.grados.CicloCreateDTO;
 import dev.ale.sep_project.dtos.grados.CiclosGradoDTO;
@@ -18,11 +20,12 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class CicloGradoService {
     private final CicloGradoRepository cicloGradoRepository;
+    private final GradoSeccionTurnoRepository gradoSeccionTurnoRepository;
     private final GradoRepository gradoRepository;
 
     public void crearCiclo(CicloCreateDTO cicloDto) {
-        Grado grado = gradoRepository.findById(cicloDto.getId_grado())
-            .orElseThrow(() -> new ResourceNotFoundException("Grado", cicloDto.getId_grado()));
+        GradoSeccionTurno grado = gradoSeccionTurnoRepository.findById(cicloDto.getId_grado_seccion_grado())
+            .orElseThrow(() -> new ResourceNotFoundException("GradoSeccionTurno", cicloDto.getId_grado_seccion_grado()));
 
         // Verificar si ya existe un ciclo para este grado en el año especificado
         boolean cicloExistente = grado.getCicloGrado().stream()
@@ -31,22 +34,22 @@ public class CicloGradoService {
         if (cicloExistente) {
             throw new BusinessLogicException(
                 String.format("Ya existe un ciclo para el grado %d° %s turno %s en el año %d",
-                    grado.getNroGrado(), 
-                    grado.getSeccion(), 
-                    grado.getTurno(), 
+                    grado.getGrado().getNroGrado(),
+                    grado.getSeccion().getLetra(),
+                    grado.getTurno().getNombreTurno(),
                     cicloDto.getAnio())
             );
         }
 
         CicloGrado nuevoCiclo = new CicloGrado();
         nuevoCiclo.setAnio(cicloDto.getAnio());
-        nuevoCiclo.setGrado(grado);
+        nuevoCiclo.setGradoSeccionTurno(grado);
         cicloGradoRepository.save(nuevoCiclo);
     }
 
     public List<GradoCiclosDTO> listarCiclosGrado(Long gradoId) {
-        Grado grado = gradoRepository.findById(gradoId)
-            .orElseThrow(() -> new ResourceNotFoundException("Grado", gradoId));
+        GradoSeccionTurno grado = gradoSeccionTurnoRepository.findById(gradoId)
+            .orElseThrow(() -> new ResourceNotFoundException("GradoSeccionTurno", gradoId));
         
         return grado.getCicloGrado().stream()
             .map(ciclo -> GradoCiclosDTO.builder()
@@ -58,8 +61,7 @@ public class CicloGradoService {
     }
 
     public List<Long> getCiclosDisponibles() {
-        List<Long> ciclosActuales = cicloGradoRepository.findAniosDisponibles();
-        return ciclosActuales;
+        return cicloGradoRepository.findAniosDisponibles();
     }
 
     public CicloGrado obtenerCiclo(Long cicloId) {
@@ -77,14 +79,14 @@ public class CicloGradoService {
         // Más lógica de finalización...
     }
 
-    public CicloGrado getCicloGrado(int anio, Grado grado) {
-        CicloGrado cicloGrado = cicloGradoRepository.findByAnioAndGrado(anio, grado)
+    public CicloGrado getCicloGrado(int anio, GradoSeccionTurno grado) {
+        CicloGrado cicloGrado = cicloGradoRepository.findByAnioAndGradoSeccionTurno(anio, grado)
             .orElseThrow(() -> new ResourceNotFoundException("No se encontró el ciclo grado"));
         return cicloGrado;
     }
 
-    public boolean existeCicloGrado(int anio, Grado grado) {
-        return cicloGradoRepository.existsByAnioAndGrado(anio, grado);
+    public boolean existeCicloGrado(int anio, GradoSeccionTurno grado) {
+        return cicloGradoRepository.existsByAnioAndGradoSeccionTurno(anio, grado);
     }
 
     public List<CiclosGradoDTO> getCiclosGradoDisponible() {
@@ -93,9 +95,9 @@ public class CicloGradoService {
         return ciclosGrados.stream()
             .map(ciclo -> CiclosGradoDTO.builder()
                 .id(ciclo.getId())
-                .grado(ciclo.getGrado().getNroGrado())
-                .seccion(ciclo.getGrado().getSeccion())
-                .turno(ciclo.getGrado().getTurno())
+                .grado(ciclo.getGradoSeccionTurno().getGrado().getNroGrado())
+                .seccion(ciclo.getGradoSeccionTurno().getSeccion().getLetra())
+                .turno(ciclo.getGradoSeccionTurno().getTurno().getNombreTurno())
                 .anio(ciclo.getAnio())
                 .build())
             .toList();

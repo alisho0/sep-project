@@ -10,9 +10,13 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
+@NoArgsConstructor
+@AllArgsConstructor
 @Data
 public class CicloGrado {
     @Id
@@ -20,8 +24,8 @@ public class CicloGrado {
     private Long id;
     
     @ManyToOne
-    @JoinColumn(name = "grado_id")
-    private Grado grado;
+    @JoinColumn(name = "grado_seccion_turno_id")
+    private GradoSeccionTurno gradoSeccionTurno;
 
     private int anio;
     
