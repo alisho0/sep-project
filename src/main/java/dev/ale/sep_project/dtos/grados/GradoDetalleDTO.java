@@ -8,6 +8,7 @@ import lombok.Data;
 @Data
 @Builder
 public class GradoDetalleDTO {
-    private GradoListaDTO gradoListaDTO;
-    private List<GradoCiclosDTO> gradoCiclos;
+    private Long id;
+    private Long inscriptosActuales;
+    private List<SeccionCiclo> seccionCiclos;
 }

@@ -5,19 +5,18 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import dev.ale.sep_project.dtos.grados.CiclosInfoDTO;
+import dev.ale.sep_project.dtos.grados.SeccionCiclo;
+import dev.ale.sep_project.exceptions.BusinessLogicException;
 import dev.ale.sep_project.models.CicloGrado;
 import dev.ale.sep_project.models.GradoSeccionTurno;
 import dev.ale.sep_project.models.Seccion;
-import dev.ale.sep_project.repository.CicloGradoRepository;
-import dev.ale.sep_project.repository.GradoSeccionTurnoRepository;
-import dev.ale.sep_project.repository.SeccionRepository;
+import dev.ale.sep_project.repository.*;
 import org.springframework.stereotype.Service;
 
 import dev.ale.sep_project.dtos.grados.GradoDetalleDTO;
 import dev.ale.sep_project.dtos.grados.GradoListaDTO;
 import dev.ale.sep_project.exceptions.ResourceNotFoundException;
 import dev.ale.sep_project.models.Grado;
-import dev.ale.sep_project.repository.GradoRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -25,28 +24,28 @@ import lombok.RequiredArgsConstructor;
 public class GradoService {
     private final GradoRepository gradoRepository;
     private final SeccionRepository seccionRepository;
+    private final AlumnoRepository alumnoRepository;
     private final GradoSeccionTurnoRepository gradoSeccionTurnoRepository;
     private final CicloGradoRepository cicloGradoRepository;
     private final CicloGradoService cicloGradoService;  // Inyectamos el servicio de ciclos
 
     public List<GradoListaDTO> listarGrados() {
         List<Integer> grados = getGrados(); // ej. [1, 2, 3, ..., 47]
+
         List<GradoListaDTO> resultado = new ArrayList<>();
 
         for (Integer nroGrado : grados) {
-            List<CicloGrado> ciclos = cicloGradoRepository.findByGradoSeccionTurno_Grado_NroGrado(nroGrado);
+            List<String> seccionesDisponibles = seccionRepository.findDistinctByCombinaciones_Grado_NroGrado(nroGrado.longValue()).stream()
+                    .map(Seccion::getLetra)
+                    .toList();
 
-            List<CiclosInfoDTO> ciclosDTO = ciclos.stream()
-                    .map(ciclo -> new CiclosInfoDTO(
-                            ciclo.getId(),
-                            ciclo.getAnio(),
-                            ciclo.getRegistros().size()
-                    ))
-                    .collect(Collectors.toList());
-
+            Long cantAlumnos = alumnoRepository.countByRegistroAlumno_CicloGrado_GradoSeccionTurno_Grado_NroGrado(nroGrado.longValue());
+            Grado grado = gradoRepository.findByNroGrado(nroGrado).orElseThrow(() -> new BusinessLogicException("Grado no encontrado"));
             GradoListaDTO dto = GradoListaDTO.builder()
+                    .id(grado.getId())
                     .grado(nroGrado)
-                    .ciclos(ciclosDTO)
+                    .secciones(seccionesDisponibles)
+                    .cantAlumnos(cantAlumnos)
                     .build();
             // Si tenés un id de grado, lo podés setear también:
             // dto.setId(gradoRepository.getIdPorNroGrado(nroGrado));
@@ -60,15 +59,18 @@ public class GradoService {
     public GradoDetalleDTO detalleGrado(Long id) {
         Grado grado = gradoRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Grado", id));
-        
-        GradoListaDTO gradoDto = GradoListaDTO.builder()
-            .id(grado.getId())
-            .grado(grado.getNroGrado())
-            .build();
-        
+
+        List<SeccionCiclo> seccionCiclo = grado.getCombinaciones().stream()
+                .map(g -> SeccionCiclo.builder()
+                        .seccion(g.getSeccion().getLetra())
+                        .gradoCiclos(cicloGradoService.listarCiclosGrado(id))
+                        .build())
+                .toList();
+
         return GradoDetalleDTO.builder()
-            .gradoListaDTO(gradoDto)
-            .gradoCiclos(cicloGradoService.listarCiclosGrado(id))  // Usamos el servicio de ciclos
+                .id(grado.getId())
+                .inscriptosActuales((long) 10)
+                .seccionCiclos(seccionCiclo)
             .build();
     }
 
@@ -79,7 +81,7 @@ public class GradoService {
     }
 
     public List<Integer> getGrados() {
-        return gradoRepository.findByNroGradoDesc();
+        return gradoRepository.findByNroGradoAsc();
     }
 
     public List<String> getSecciones() {

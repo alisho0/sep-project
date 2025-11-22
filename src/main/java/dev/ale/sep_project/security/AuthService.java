@@ -78,7 +78,7 @@ public class AuthService {
     public AuthResponse register(RegisterRequest request) {
         
         
-        if (!maestroRepository.findByDni(request.getDni()).isPresent()) {
+        if (maestroRepository.findByDni(request.getDni()).isPresent()) {
             throw new RuntimeException("El DNI que estás pasando ya existe en el sistema");
         }
         Maestro maestro = new Maestro();
