@@ -63,13 +63,19 @@ public class GradoService {
         List<SeccionCiclo> seccionCiclo = grado.getCombinaciones().stream()
                 .map(g -> SeccionCiclo.builder()
                         .seccion(g.getSeccion().getLetra())
-                        .gradoCiclos(cicloGradoService.listarCiclosGrado(id))
+                        .gradoCiclos(cicloGradoService.listarCiclosByGrado(g.getCicloGrado()))
                         .build())
                 .toList();
 
+        Long inscriptos = grado.getCombinaciones().stream()
+                .flatMap(gst -> gst.getCicloGrado().stream())
+                .mapToLong(c -> c.getRegistros().size())
+                .sum();
+
         return GradoDetalleDTO.builder()
                 .id(grado.getId())
-                .inscriptosActuales((long) 10)
+                .nro((long) grado.getNroGrado())
+                .inscriptosActuales(inscriptos)
                 .seccionCiclos(seccionCiclo)
             .build();
     }

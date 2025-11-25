@@ -54,10 +54,19 @@ public class CicloGradoService {
         return grado.getCicloGrado().stream()
             .map(ciclo -> GradoCiclosDTO.builder()
                 .id(ciclo.getId())
-                .año(ciclo.getAnio())
+                .anio(ciclo.getAnio())
                 .cantAlumnos(ciclo.getRegistros().size())
                 .build())
             .toList();
+    }
+    public List<GradoCiclosDTO> listarCiclosByGrado(List<CicloGrado> ciclos) {
+        return ciclos.stream()
+                .map(c -> GradoCiclosDTO.builder()
+                        .id(c.getId())
+                        .anio(c.getAnio())
+                        .cantAlumnos(c.getRegistros().size())
+                        .build())
+                .toList();
     }
 
     public List<Long> getCiclosDisponibles() {

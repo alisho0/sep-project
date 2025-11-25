@@ -7,6 +7,6 @@ import lombok.Data;
 @Builder
 public class GradoCiclosDTO {
     private Long id; 
-    private int año;
+    private int anio;
     private int cantAlumnos;
 }
