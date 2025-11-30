@@ -35,6 +35,15 @@ public class GradoCicloController {
         }
     }
 
+    @GetMapping("/detalle_seccion/{id}")
+    public ResponseEntity<?> detalleSeccion(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(cicloGradoService.detalleSeccion(id));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Hubo un problema al traer el ciclo");
+        }
+    }
+
     @GetMapping("/listar")
     public ResponseEntity<?> listarCiclos() {
         try {

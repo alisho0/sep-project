@@ -2,6 +2,8 @@ package dev.ale.sep_project.services;
 
 import java.util.List;
 
+import dev.ale.sep_project.dtos.alumnos.AlumnoResponseDTO;
+import dev.ale.sep_project.dtos.grados.CicloDetalleDTO;
 import dev.ale.sep_project.models.GradoSeccionTurno;
 import dev.ale.sep_project.repository.GradoSeccionTurnoRepository;
 import org.springframework.stereotype.Service;
@@ -96,6 +98,28 @@ public class CicloGradoService {
             throw new BusinessLogicException("No se puede finalizar un ciclo con registros activos");
         }
         // Más lógica de finalización...
+    }
+
+    public CicloDetalleDTO detalleSeccion(Long id) {
+        CicloGrado ciclo = cicloGradoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("CicloGrado", id));
+        Long cantAlumnos = (long) ciclo.getRegistros().size();
+
+        List<AlumnoResponseDTO> alumnos = ciclo.getRegistros().stream()
+                .map(r -> AlumnoResponseDTO.builder()
+                        .id(r.getAlumno().getId())
+                        .nombre(r.getAlumno().getNombre())
+                        .apellido(r.getAlumno().getApellido())
+                        .dni(r.getAlumno().getDni())
+                        .build())
+                .toList();
+
+        return new CicloDetalleDTO(ciclo.getId(),
+                cantAlumnos,
+                (long) ciclo.getAnio(),
+                (long) ciclo.getGradoSeccionTurno().getGrado().getNroGrado(),
+                alumnos
+                );
     }
 
     public CicloGrado getCicloGrado(int anio, GradoSeccionTurno grado) {
