@@ -62,7 +62,9 @@ public class GradoService {
 
         List<SeccionCiclo> seccionCiclo = grado.getCombinaciones().stream()
                 .map(g -> SeccionCiclo.builder()
+                        .id(g.getId())
                         .seccion(g.getSeccion().getLetra())
+                        .turno(g.getTurno().getNombreTurno())
                         .gradoCiclos(cicloGradoService.listarCiclosByGrado(g.getCicloGrado()))
                         .build())
                 .toList();

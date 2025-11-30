@@ -2,19 +2,11 @@ package dev.ale.sep_project.controllers;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import dev.ale.sep_project.dtos.grados.CicloCreateDTO;
 import dev.ale.sep_project.services.CicloGradoService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
-
-
 
 
 @RestController
@@ -61,5 +53,13 @@ public class GradoCicloController {
         }
     }
     
-        
+    @DeleteMapping("/eliminar/{id}")
+    public ResponseEntity<?> borrarGrado(@PathVariable Long id) {
+        try {
+            cicloGradoService.eliminarCicloGrado(id);
+            return ResponseEntity.ok("Ciclo grado eliminado correctamente.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No se pudo eliminar el ciclo con el id " + id );
+        }
+    }
 }

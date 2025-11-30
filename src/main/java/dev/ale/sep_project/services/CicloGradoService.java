@@ -69,6 +69,16 @@ public class CicloGradoService {
                 .toList();
     }
 
+    public void eliminarCicloGrado(Long id) {
+        try {
+            CicloGrado ciclo = cicloGradoRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Ciclo", id));
+            cicloGradoRepository.delete(ciclo);
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public List<Long> getCiclosDisponibles() {
         return cicloGradoRepository.findAniosDisponibles();
     }
