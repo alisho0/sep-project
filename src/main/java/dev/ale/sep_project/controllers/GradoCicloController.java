@@ -35,7 +35,7 @@ public class GradoCicloController {
         }
     }
 
-    @GetMapping("/detalle_seccion/{id}")
+    @GetMapping("/detalleCiclo/{id}")
     public ResponseEntity<?> detalleSeccion(@PathVariable Long id) {
         try {
             return ResponseEntity.ok(cicloGradoService.detalleSeccion(id));
