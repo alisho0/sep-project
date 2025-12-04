@@ -1,12 +1,11 @@
 package dev.ale.sep_project.controllers;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 import dev.ale.sep_project.services.MetricaService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 
 @RestController
@@ -24,5 +23,13 @@ public class MetricaController {
     public Long getAlumnosTotales() {
         return metricaService.alumnosTotales();
     }
-    
+
+    @GetMapping("/cicloDetalle/{id}")
+    public ResponseEntity<?> metricasCSG(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(metricaService.getMetricasPorGradoSeccion(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
 }

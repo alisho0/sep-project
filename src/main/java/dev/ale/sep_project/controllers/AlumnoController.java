@@ -54,7 +54,6 @@ public class AlumnoController {
         }
     }
     
-    
     @GetMapping("/listar")
     public ResponseEntity<?> listarAlumnos() {
         try {
@@ -62,6 +61,15 @@ public class AlumnoController {
             return ResponseEntity.ok(alumnos);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al listar alumnos: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("listarPorCSG/{id}")
+    public ResponseEntity<?> listarPorCSG(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(alumnoService.listarAlumnosPorCSG(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró alumnos en la sección mandada.");
         }
     }
 

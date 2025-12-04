@@ -4,6 +4,8 @@ import org.springframework.data.repository.CrudRepository;
 
 import dev.ale.sep_project.models.RegistroAlumno;
 
-public interface RegistroAlumnoRepository extends CrudRepository<RegistroAlumno, Long> {
+import java.util.List;
 
+public interface RegistroAlumnoRepository extends CrudRepository<RegistroAlumno, Long> {
+    List<RegistroAlumno> findByCicloGrado_Id(Long cicloId);
 }

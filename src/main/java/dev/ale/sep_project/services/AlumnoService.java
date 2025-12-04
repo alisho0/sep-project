@@ -5,14 +5,11 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import dev.ale.sep_project.dtos.alumnos.*;
 import dev.ale.sep_project.models.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import dev.ale.sep_project.dtos.alumnos.AlumnoCreateDTO;
-import dev.ale.sep_project.dtos.alumnos.AlumnoDetalleDTO;
-import dev.ale.sep_project.dtos.alumnos.AlumnoResponseDTO;
-import dev.ale.sep_project.dtos.alumnos.AlumnoUpdateDTO;
 import dev.ale.sep_project.dtos.registros.TutorListaDTO;
 import dev.ale.sep_project.dtos.tutor.TutorRespuestaDTO;
 import dev.ale.sep_project.repository.AlumnoRepository;
@@ -106,7 +103,7 @@ public class AlumnoService {
         }
     }
 
-    // Método que traer todos los alumnos con detalles mínimos.
+    // Metodo que traer todos los alumnos con detalles mínimos.
     public List<AlumnoResponseDTO> obtenerAlumnos() throws Exception {
         try {
             List<Alumno> alumnos = (List<Alumno>) alumnoRepository.findAll();
@@ -136,6 +133,21 @@ public class AlumnoService {
             return alumnosDTO;
         } catch (Exception e) {
             throw new Exception(e.getMessage().toString());
+        }
+    }
+
+    public List<AlumnoInscriptoDTO> listarAlumnosPorCSG(Long idCiclo) {
+        try {
+            List<RegistroAlumno> registros = registroAlumnoRepository.findByCicloGrado_Id(idCiclo);
+            return registros.stream()
+                    .map(r -> new AlumnoInscriptoDTO(
+                            r.getAlumno().getId(),
+                            r.getAlumno().getNombre() + " " + r.getAlumno().getApellido(),
+                            r.getAlumno().getDni()
+                    ))
+                    .toList();
+        } catch (RuntimeException e) {
+            throw new RuntimeException(e);
         }
     }
 
