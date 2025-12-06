@@ -1,5 +1,6 @@
 package dev.ale.sep_project.controllers;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,7 +18,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-
+import java.util.List;
 
 
 @RestController
@@ -60,4 +61,14 @@ public class ObservacionController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
+    @GetMapping("/listar/{id}")
+    public ResponseEntity<?> listarObsPorCicloGrado(@PathVariable Long id) {
+        try {
+            List<ObservacionDTO> obs = observacionService.listarObservacionesPorCicloGrado(id);
+            return ResponseEntity.ok(obs);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No se pudo listar las observaciones por ciclo" + e.getMessage());
+        }
     }
+}
