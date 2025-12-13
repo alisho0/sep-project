@@ -31,8 +31,7 @@ public class ObservacionController {
     @PostMapping("/crear")
     public ResponseEntity<?> crearObservacion(@RequestBody ObservacionCreateDTO observacionDTO) {
         try {
-            observacionService.nuevaObservacion(observacionDTO);
-            return ResponseEntity.ok("Observación creada exitosamente");
+            return ResponseEntity.ok(observacionService.nuevaObservacion(observacionDTO));
         } catch (ResourceNotFoundException e) {
             return ResponseEntity.notFound().build();
         } catch (BusinessLogicException e) {

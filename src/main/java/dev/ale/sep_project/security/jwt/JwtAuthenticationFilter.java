@@ -3,6 +3,7 @@ package dev.ale.sep_project.security.jwt;
 import java.io.IOException;
 import java.util.Optional;
 
+import io.jsonwebtoken.Claims;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -79,9 +80,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     return;
                 }
 
-                final UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+                Claims claims = jwtService.extractAllClaims(jwtToken);
 
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                final UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails,
+                        null,
+                        userDetails.getAuthorities());
+
+                authToken.setDetails((claims));
+
+                // Esto es para más tarde, juntar a claims y esto junto.
+                // authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authToken);
 
                 filterChain.doFilter(request, response);

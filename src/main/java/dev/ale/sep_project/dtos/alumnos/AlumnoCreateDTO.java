@@ -18,7 +18,7 @@ public class AlumnoCreateDTO {
     @NotNull(message = "El domicilio no puede ser nulo")
     private String domicilio;
     private Boolean discapacidad;
-    private List<String> discapacidadesSeleccionadas;
+    private List<Long> discapacidadesSeleccionadas;
     private String detalleDiscap;
     // Agregar lista de IDs de tutores, vendrían algo como esto: [1, 4, 3]
     List<Long> tutoresIds;

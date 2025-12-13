@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -40,8 +41,8 @@ public class JwtService {
     private String buildToken(final Usuario usuario, final long expiration) {
         return Jwts
             .builder()
-            .setId(usuario.getId().toString())
             .setSubject(usuario.getUsername())
+            .claim("userId", usuario.getId())
             .claim("rol", usuario.getRol().name())
             .setIssuedAt(new Date(System.currentTimeMillis()))
             .setExpiration(new Date(System.currentTimeMillis() + expiration))
@@ -81,5 +82,12 @@ public class JwtService {
             .parseClaimsJws(token)
             .getBody();
         return jwtToken.getSubject();
+    }
+    public Claims extractAllClaims(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(getKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
     }
 }

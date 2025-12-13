@@ -1,7 +1,12 @@
 package dev.ale.sep_project.services;
 
 import dev.ale.sep_project.models.CicloGrado;
+import dev.ale.sep_project.models.Usuario;
 import dev.ale.sep_project.repository.CicloGradoRepository;
+import dev.ale.sep_project.repository.UsuarioRepository;
+import dev.ale.sep_project.security.jwt.JwtService;
+import io.jsonwebtoken.Claims;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import dev.ale.sep_project.dtos.observaciones.ObservacionCreateDTO;
@@ -21,14 +26,14 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ObservacionService {
-
     private final ObservacionRepository observacionRepository;
     private final RegistroAlumnoRepository registroRepository;
     private final ActividadService actividadService;
     private final CicloGradoRepository cicloGradoRepository;
+    private final UsuarioRepository usuarioRepository;
 
     @Transactional
-    public void nuevaObservacion(ObservacionCreateDTO observacionDTO) {
+    public ObservacionDTO nuevaObservacion(ObservacionCreateDTO observacionDTO) {
         // Validar que existe el registro
         RegistroAlumno registro = registroRepository.findById(observacionDTO.getIdRegistro())
             .orElseThrow(() -> new ResourceNotFoundException("Registro Alumno", observacionDTO.getIdRegistro()));
@@ -38,16 +43,27 @@ public class ObservacionService {
             throw new BusinessLogicException("El contenido de la observación no puede estar vacío");
         }
 
+        Claims claims = (Claims) SecurityContextHolder.getContext().getAuthentication().getDetails();
+        Long userId = claims.get("userId", Long.class);
+        Usuario usuario = usuarioRepository.findById(userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", userId));
+
         Observacion observacion = new Observacion();
         observacion.setContenido(observacionDTO.getContenido());
         observacion.setFecha(observacionDTO.getFecha());
         observacion.setRegistroAlumno(registro);
-        observacion.setUsuario(null); // TODO: Obtener usuario actual cuando implementes autenticación
+        observacion.setUsuario(usuario);
 
         // Registro la actividad
         actividadService.registrarActividad("Nueva observación registrada para " + (registro.getAlumno().getNombre() + " " + registro.getAlumno().getApellido()), "OBSERVACION");
 
         observacionRepository.save(observacion);
+        return ObservacionDTO.builder()
+                .id(observacion.getId())
+                .contenido(observacion.getContenido())
+                .nombreUsuario(usuario.getUsername())
+                .alumno(observacion.getRegistroAlumno().getAlumno().getNombre() + " " + observacion.getRegistroAlumno().getAlumno().getApellido() )
+                .build();
     }
 
     public ObservacionDTO traerObservacion(Long id) {
@@ -82,7 +98,8 @@ public class ObservacionService {
                                             .contenido(o.getContenido())
                                             .fecha(o.getFecha())
                                             //.nombreUsuario(o.getUsuario().getMaestro().getNombre() + " " + o.getUsuario().getMaestro().getApellido())
-                                            .nombreUsuario("John Doe")
+                                            .nombreUsuario(o.getUsuario() != null ? o.getUsuario().getUsername() : "Sin usuario")
+                                            .alumno(o.getRegistroAlumno().getAlumno().getNombre() + " " + o.getRegistroAlumno().getAlumno().getApellido())
                                             .build()
                             ))
                             .toList();

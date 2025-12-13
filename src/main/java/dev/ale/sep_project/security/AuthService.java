@@ -53,7 +53,6 @@ public class AuthService {
                 .token(token)
                 .refreshToken(refreshToken)
                 .build();
-                
         } catch (BadCredentialsException e) {
             throw new BadCredentialsException("Credenciales inválidas");
         } catch (UsernameNotFoundException e) {
@@ -92,9 +91,13 @@ public class AuthService {
             .username(request.getUsername())
             .password(passwordEncoder.encode(request.getPassword()))
             .rol(Rol.USUARIO)
+            .maestro(maestro)
             .build();
         
         Usuario usuarioGuardado = usuarioRepository.save(user);
+        maestro.setUsuario(usuarioGuardado);
+        maestroRepository.save(maestro);
+
         String jwtToken = jwtService.generateToken(usuarioGuardado);
         String refreshToken = jwtService.generateRefreshToken(usuarioGuardado);
         saveUserToken(usuarioGuardado, jwtToken);

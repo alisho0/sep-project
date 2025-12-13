@@ -12,4 +12,5 @@ public class ObservacionDTO {
     private String contenido;
     private String nombreUsuario;
     private LocalDate fecha;
+    private String alumno;
 }

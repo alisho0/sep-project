@@ -13,4 +13,5 @@ public class AlumnoResponseDTO {
     private int ultGrado;
     private String seccionGrado;
     private String turno;
+    private Long registro;
 }

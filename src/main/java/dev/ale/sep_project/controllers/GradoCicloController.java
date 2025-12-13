@@ -1,5 +1,6 @@
 package dev.ale.sep_project.controllers;
 
+import dev.ale.sep_project.dtos.maestros.MaestroAsignarCicloDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -69,6 +70,26 @@ public class GradoCicloController {
             return ResponseEntity.ok("Ciclo grado eliminado correctamente.");
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No se pudo eliminar el ciclo con el id " + id );
+        }
+    }
+
+    @PostMapping("/{idCiclo}/maestros/{idMaestro}")
+    public ResponseEntity<?> asignarMaestro(@PathVariable Long idCiclo, @PathVariable Long idMaestro) {
+        try {
+            cicloGradoService.asignarMaestroCiclo(idCiclo, idMaestro);
+            return ResponseEntity.ok("Maestro asignado correctamente.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al asignar un maestro: " + e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{idCiclo}/maestros/{idMaestro}")
+    public ResponseEntity<?> desvincularMaestro(@PathVariable Long idCiclo, @PathVariable Long idMaestro) {
+        try {
+            cicloGradoService.desvincularMaestroCiclo(idCiclo, idMaestro);
+            return ResponseEntity.ok("Maestro desvinculado correctamente.");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al asignar un maestro: " + e.getMessage());
         }
     }
 }

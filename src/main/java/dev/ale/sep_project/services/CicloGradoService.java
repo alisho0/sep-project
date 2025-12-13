@@ -1,11 +1,15 @@
 package dev.ale.sep_project.services;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import dev.ale.sep_project.dtos.alumnos.AlumnoResponseDTO;
 import dev.ale.sep_project.dtos.grados.CicloDetalleDTO;
+import dev.ale.sep_project.dtos.maestros.MaestroAsignarCicloDTO;
 import dev.ale.sep_project.models.GradoSeccionTurno;
+import dev.ale.sep_project.models.Maestro;
 import dev.ale.sep_project.repository.GradoSeccionTurnoRepository;
+import dev.ale.sep_project.repository.MaestroRepository;
 import org.springframework.stereotype.Service;
 import dev.ale.sep_project.dtos.grados.CicloCreateDTO;
 import dev.ale.sep_project.dtos.grados.CiclosGradoDTO;
@@ -13,7 +17,6 @@ import dev.ale.sep_project.dtos.grados.GradoCiclosDTO;
 import dev.ale.sep_project.exceptions.BusinessLogicException;
 import dev.ale.sep_project.exceptions.ResourceNotFoundException;
 import dev.ale.sep_project.models.CicloGrado;
-import dev.ale.sep_project.models.Grado;
 import dev.ale.sep_project.repository.CicloGradoRepository;
 import dev.ale.sep_project.repository.GradoRepository;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +27,7 @@ public class CicloGradoService {
     private final CicloGradoRepository cicloGradoRepository;
     private final GradoSeccionTurnoRepository gradoSeccionTurnoRepository;
     private final GradoRepository gradoRepository;
+    private final MaestroRepository maestroRepository;
 
     public void crearCiclo(CicloCreateDTO cicloDto) {
         GradoSeccionTurno grado = gradoSeccionTurnoRepository.findById(cicloDto.getId_grado_seccion_grado())
@@ -111,6 +115,7 @@ public class CicloGradoService {
                         .nombre(r.getAlumno().getNombre())
                         .apellido(r.getAlumno().getApellido())
                         .dni(r.getAlumno().getDni())
+                        .registro(r.getId())
                         .build())
                 .toList();
 
@@ -144,5 +149,35 @@ public class CicloGradoService {
                 .anio(ciclo.getAnio())
                 .build())
             .toList();
+    }
+
+    public void asignarMaestroCiclo(Long idCiclo, Long idMaestro) {
+        CicloGrado cicloGrado = cicloGradoRepository.findById(idCiclo)
+                .orElseThrow(() -> new ResourceNotFoundException("CicloGrado", idCiclo));
+        Maestro maestro = maestroRepository.findById(idMaestro)
+                .orElseThrow(() -> new ResourceNotFoundException("Maestro", idMaestro));
+
+        if (cicloGrado.getMaestros() == null) {
+            cicloGrado.setMaestros(new ArrayList<>());
+        }
+
+        if (!cicloGrado.getMaestros().contains(maestro)) {
+            cicloGrado.getMaestros().add(maestro);
+        }
+
+        cicloGradoRepository.save(cicloGrado);
+    }
+
+    public void desvincularMaestroCiclo(Long idCiclo, Long idMaestro) {
+        CicloGrado cicloGrado = cicloGradoRepository.findById(idCiclo)
+                .orElseThrow(() -> new ResourceNotFoundException("CicloGrado", idCiclo));
+        Maestro maestro = maestroRepository.findById(idMaestro)
+                .orElseThrow(() -> new ResourceNotFoundException("Maestro", idMaestro));
+
+        if (cicloGrado.getMaestros() != null) {
+            cicloGrado.getMaestros().removeIf(m -> m.getId().equals(maestro.getId()));
+        }
+
+        cicloGradoRepository.save(cicloGrado);
     }
 }

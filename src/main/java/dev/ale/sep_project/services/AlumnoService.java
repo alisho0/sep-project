@@ -7,16 +7,12 @@ import java.util.stream.Collectors;
 
 import dev.ale.sep_project.dtos.alumnos.*;
 import dev.ale.sep_project.models.*;
+import dev.ale.sep_project.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import dev.ale.sep_project.dtos.registros.TutorListaDTO;
 import dev.ale.sep_project.dtos.tutor.TutorRespuestaDTO;
-import dev.ale.sep_project.repository.AlumnoRepository;
-import dev.ale.sep_project.repository.CicloGradoRepository;
-import dev.ale.sep_project.repository.GradoRepository;
-import dev.ale.sep_project.repository.RegistroAlumnoRepository;
-import dev.ale.sep_project.repository.TutorRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -30,6 +26,7 @@ public class AlumnoService {
     private final RegistroAlumnoRepository registroAlumnoRepository;
     private final GradoService gradoService;
     private final CicloGradoService cicloGradoService;
+    private final DiscapacidadRepository discapacidadRepository;
 
     @Transactional
     public AlumnoResponseDTO crearAlumno(AlumnoCreateDTO alumnoDto) throws Exception {
@@ -37,6 +34,7 @@ public class AlumnoService {
             throw new Exception("Ya existe un alumno con el DNI: " + alumnoDto.getDni());
         }
         try {
+
             // Crear alumno solo con datos básicos
             Alumno alumno = new Alumno();
             alumno.setNombre(alumnoDto.getNombre());
@@ -45,6 +43,17 @@ public class AlumnoService {
             alumno.setDetalleDiscap(alumnoDto.getDetalleDiscap());
             alumno.setDomicilio(alumnoDto.getDomicilio());
             alumno.setDni(alumnoDto.getDni());
+            if (!alumnoDto.getDiscapacidadesSeleccionadas().isEmpty()) {
+                List<Long> ids = alumnoDto.getDiscapacidadesSeleccionadas();
+                List<Discapacidad> discapacidades = discapacidadRepository.findAllById(ids).stream().toList();
+
+                if (discapacidades.size() != ids.size()) {
+                    throw new Exception("Alguna discapacidad no existe");
+                }
+
+                alumno.setDiscapacidades(discapacidades);
+            }
+
 
             // Inicializa la lista de tutores si es null
             if (alumno.getTutores() == null) {
