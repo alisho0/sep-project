@@ -124,18 +124,18 @@ public class AlumnoService {
                 RegistroAlumno ultimoRegistro = alu.getRegistroAlumno().stream()
                         .sorted(Comparator.comparing(RegistroAlumno::getFechaInicio).reversed())
                         .findFirst()
-                        .orElseThrow(() -> new Exception("No se encontraron registros"));
-                System.out.println("El último registro es: " + ultimoRegistro.getFechaInicio());
+                        .orElse(null);
+//                System.out.println("El último registro es: " + ultimoRegistro.getFechaInicio());
                 AlumnoResponseDTO alumnoRespuesta = AlumnoResponseDTO.builder()
                         .id(alu.getId())
                         .nombre(alu.getNombre())
                         .apellido(alu.getApellido())
                         .dni(alu.getDni())
-                        .ultGrado(ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getGrado().getNroGrado())
-                        .seccionGrado(ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getSeccion().getLetra())
-                        .turno(ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getTurno().getNombreTurno())
+                        .ultGrado(ultimoRegistro != null ? ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getGrado().getNroGrado() : 0)
+                        .seccionGrado(ultimoRegistro != null ? ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getSeccion().getLetra() : "Sin registrar")
+                        .turno(ultimoRegistro != null ? ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getTurno().getNombreTurno(): "Sin registrar")
                         .build();
-                System.out.println("Testeo del dto: " + alumnoRespuesta);
+//                System.out.println("Testeo del dto: " + alumnoRespuesta);
                 alumnosDTO.add(alumnoRespuesta);
             }
 

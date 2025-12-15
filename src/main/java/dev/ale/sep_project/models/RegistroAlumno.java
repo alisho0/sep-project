@@ -3,14 +3,7 @@ package dev.ale.sep_project.models;
 import java.time.LocalDate;
 import java.util.List;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -31,7 +24,7 @@ public class RegistroAlumno {
     @JoinColumn(name = "alumno_id")
     private Alumno alumno;
     
-    @OneToMany(mappedBy = "registroAlumno")
+    @OneToMany(mappedBy = "registroAlumno", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Observacion> observaciones;
     
     @ManyToOne
