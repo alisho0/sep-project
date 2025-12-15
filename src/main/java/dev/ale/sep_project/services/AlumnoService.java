@@ -152,7 +152,8 @@ public class AlumnoService {
                     .map(r -> new AlumnoInscriptoDTO(
                             r.getAlumno().getId(),
                             r.getAlumno().getNombre() + " " + r.getAlumno().getApellido(),
-                            r.getAlumno().getDni()
+                            r.getAlumno().getDni(),
+                            r.getId()
                     ))
                     .toList();
         } catch (RuntimeException e) {

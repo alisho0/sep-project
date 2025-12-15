@@ -109,21 +109,20 @@ public class CicloGradoService {
                 .orElseThrow(() -> new ResourceNotFoundException("CicloGrado", id));
         Long cantAlumnos = (long) ciclo.getRegistros().size();
 
-        List<AlumnoResponseDTO> alumnos = ciclo.getRegistros().stream()
-                .map(r -> AlumnoResponseDTO.builder()
-                        .id(r.getAlumno().getId())
-                        .nombre(r.getAlumno().getNombre())
-                        .apellido(r.getAlumno().getApellido())
-                        .dni(r.getAlumno().getDni())
-                        .registro(r.getId())
-                        .build())
-                .toList();
+//        List<AlumnoResponseDTO> alumnos = ciclo.getRegistros().stream()
+//                .map(r -> AlumnoResponseDTO.builder()
+//                        .id(r.getAlumno().getId())
+//                        .nombre(r.getAlumno().getNombre())
+//                        .apellido(r.getAlumno().getApellido())
+//                        .dni(r.getAlumno().getDni())
+//                        .registro(r.getId())
+//                        .build())
+//                .toList();
 
         return new CicloDetalleDTO(ciclo.getId(),
                 cantAlumnos,
                 (long) ciclo.getAnio(),
-                (long) ciclo.getGradoSeccionTurno().getGrado().getNroGrado(),
-                alumnos
+                (long) ciclo.getGradoSeccionTurno().getGrado().getNroGrado()
                 );
     }
 

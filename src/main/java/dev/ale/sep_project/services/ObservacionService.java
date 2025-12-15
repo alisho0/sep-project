@@ -63,6 +63,7 @@ public class ObservacionService {
                 .contenido(observacion.getContenido())
                 .nombreUsuario(usuario.getUsername())
                 .alumno(observacion.getRegistroAlumno().getAlumno().getNombre() + " " + observacion.getRegistroAlumno().getAlumno().getApellido() )
+                .fecha(observacion.getFecha())
                 .build();
     }
 

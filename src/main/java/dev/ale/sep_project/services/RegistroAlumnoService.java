@@ -87,7 +87,7 @@ public class RegistroAlumnoService {
                         .map(observacion -> ObservacionDTO.builder()
                             .id(observacion.getId())
                             .contenido(observacion.getContenido())
-                            .nombreUsuario("John Doe")
+                            .nombreUsuario(observacion.getUsuario() != null ? observacion.getUsuario().getUsername() : "Sin usuario")
                             .fecha(observacion.getFecha())
                             .build())
                         .collect(Collectors.toList()))

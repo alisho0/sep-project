@@ -7,6 +7,7 @@ import java.util.List;
 public record CicloDetalleDTO(Long id,
                               Long cantAlumnos,
                               Long ciclo,
-                              Long grado,
-                              List<AlumnoResponseDTO> alumnos) {
+                              Long grado
+//                              List<AlumnoResponseDTO> alumnos
+) {
 }

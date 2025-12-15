@@ -44,8 +44,6 @@ public class RegistroAlumnoController {
         return ResponseEntity.ok().body(registroAlumnoService.obtenerAniosDisponibles(id));
     }
     
-    
-    
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<String> eliminarRegistro(@PathVariable Long id) throws Exception {
         registroAlumnoService.eliminarRegistro(id);
