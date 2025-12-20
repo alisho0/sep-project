@@ -7,5 +7,9 @@ import lombok.Data;
 @Builder
 public class RegistroCreateDTO {
     private Long idAlumno;
-    private Long idCicloGrado;
+    private Long anioCicloGrado;
+    private Long nroGrado;
+    private String seccionGrado;
+    private String turnoGrado;
+//    private Long idCicloGrado;
 }

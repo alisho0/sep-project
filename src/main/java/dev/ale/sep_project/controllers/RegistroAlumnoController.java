@@ -1,7 +1,8 @@
 package dev.ale.sep_project.controllers;
 
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import dev.ale.sep_project.dtos.registros.RegistroAniosDTO;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.*;
 
 import dev.ale.sep_project.dtos.registros.RegistroCreateDTO;
 import dev.ale.sep_project.dtos.registros.RegistroRespuestaDTO;
@@ -9,15 +10,6 @@ import dev.ale.sep_project.services.RegistroAlumnoService;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-
-
-
 
 
 @RestController
@@ -28,9 +20,13 @@ public class RegistroAlumnoController {
     private final RegistroAlumnoService registroAlumnoService;
 
     @PostMapping("/crear")
-    public ResponseEntity<String> crearRegistro(@RequestBody RegistroCreateDTO registro) {
-        registroAlumnoService.crearRegistro(registro);
-        return ResponseEntity.ok("Registro creado correctamente");
+    public ResponseEntity<?> crearRegistro(@RequestBody RegistroCreateDTO registro) {
+        try {
+            RegistroAniosDTO r = registroAlumnoService.crearRegistro(registro);
+            return ResponseEntity.ok(r);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Hubo un problema al recibir el registro: " + e.getMessage() + " - " + e.getCause());
+        }
     }
 
     @GetMapping("/detalle/{id}")
@@ -39,7 +35,7 @@ public class RegistroAlumnoController {
         return ResponseEntity.ok().body(respuestaDTO);
     }
 
-    @GetMapping("/añosDisponibles/{id}")
+    @GetMapping("/aniosDisponibles/{id}")
     public ResponseEntity<?> getAniosDisponibles(@PathVariable Long id) {
         return ResponseEntity.ok().body(registroAlumnoService.obtenerAniosDisponibles(id));
     }

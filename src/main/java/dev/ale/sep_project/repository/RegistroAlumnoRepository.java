@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface RegistroAlumnoRepository extends CrudRepository<RegistroAlumno, Long> {
     List<RegistroAlumno> findByCicloGrado_Id(Long cicloId);
+    boolean existsByAlumnoIdAndCicloGradoId(Long alumnoId, Long cicloGradoId);
 }

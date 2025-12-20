@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import dev.ale.sep_project.models.GradoSeccionTurno;
+import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
 import dev.ale.sep_project.exceptions.ResourceNotFoundException;
@@ -27,25 +29,53 @@ public class RegistroAlumnoService {
     private final RegistroAlumnoRepository registroAlumnoRepository;
     private final AlumnoRepository alumnoRepository;
     private final CicloGradoRepository cicloGradoRepository;
+    private final CicloGradoService cicloGradoService;
+    private final GradoService gradoService;
 
-    public void crearRegistro(RegistroCreateDTO registroAlumno) {
+    @Transactional
+    public RegistroAniosDTO crearRegistro(RegistroCreateDTO registroAlumno) {
         Alumno alumno = alumnoRepository.findById(registroAlumno.getIdAlumno())
-            .orElseThrow(() -> new ResourceNotFoundException("Alumno", registroAlumno.getIdAlumno()));
-        
-        CicloGrado cicloGrado = cicloGradoRepository.findById(registroAlumno.getIdCicloGrado())
-            .orElseThrow(() -> new ResourceNotFoundException("Ciclo Grado", registroAlumno.getIdCicloGrado()));
-        
+            .orElseThrow(() -> new ResourceNotFoundException("Alumno no encontrado", registroAlumno.getIdAlumno()));
+//        CicloGrado cicloGrado = cicloGradoRepository.findById(registroAlumno.getIdCicloGrado())
+//            .orElseThrow(() -> new ResourceNotFoundException("Ciclo Grado", registroAlumno.getIdCicloGrado()));
+
         try {
-            RegistroAlumno registroNuevo = RegistroAlumno.builder()
-                .alumno(alumno)
-                .cicloGrado(cicloGrado)
-                .fechaInicio(LocalDate.now())
-                .fechaFin(null)
-                .observaciones(new ArrayList<>())
-                .build();
-            registroAlumnoRepository.save(registroNuevo);
+            RegistroAlumno primerRegistro = new RegistroAlumno();
+
+            if (!gradoService.existeGrado(Math.toIntExact(registroAlumno.getNroGrado()), registroAlumno.getSeccionGrado(), registroAlumno.getTurnoGrado())) {
+                throw new Exception("No existe el grado enviado");
+            }
+            // traemos el grado
+            GradoSeccionTurno grado = gradoService.getGradoByNroSeccionTurno(Math.toIntExact(registroAlumno.getNroGrado()), registroAlumno.getSeccionGrado(), registroAlumno.getTurnoGrado());
+
+            if (!cicloGradoService.existeCicloGrado(Math.toIntExact(registroAlumno.getAnioCicloGrado()), grado)) {
+                throw new Exception("No existe el ciclo grado enviado");
+            }
+
+            CicloGrado ciclo = cicloGradoService.getCicloGrado(Math.toIntExact(registroAlumno.getAnioCicloGrado()), grado);
+            primerRegistro.setCicloGrado(ciclo);
+            primerRegistro.setAlumno(alumno);
+
+            boolean yaExiste = registroAlumnoRepository.existsByAlumnoIdAndCicloGradoId(registroAlumno.getIdAlumno(), ciclo.getId());
+            System.out.println("Salida: " + yaExiste);
+            if (yaExiste) {
+                throw new IllegalStateException("El alumno ya tiene un registro para este ciclo grado");
+            }
+
+            RegistroAlumno registroNuevo = new RegistroAlumno();
+            registroNuevo.setAlumno(alumno);
+            registroNuevo.setCicloGrado(ciclo);
+            registroNuevo.setObservaciones(new ArrayList<>());
+            registroNuevo.setFechaFin(null);
+            registroNuevo.setFechaInicio(LocalDate.now());
+
+            RegistroAlumno r = registroAlumnoRepository.save(registroNuevo);
+            return RegistroAniosDTO.builder()
+                    .id(r.getId())
+                    .anio(ciclo.getAnio())
+                    .build();
         } catch (Exception e) {
-            new Exception("No se pudo guardar el registro" + " - " + e.getMessage());
+            throw new RuntimeException("No se pudo guardar el registro - " + e.getMessage(), e);
         }
     }
 
