@@ -16,4 +16,5 @@ public class RegisterRequest {
     private String apellido;
     private String dni;
     private String domicilio;
+    private String rol;
 }

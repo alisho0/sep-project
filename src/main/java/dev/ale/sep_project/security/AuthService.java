@@ -2,6 +2,7 @@ package dev.ale.sep_project.security;
 
 import java.util.List;
 
+import jakarta.transaction.Transactional;
 import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -74,12 +75,15 @@ public class AuthService {
         }
     }
 
+    @Transactional
     public AuthResponse register(RegisterRequest request) {
         
-        
-        if (maestroRepository.findByDni(request.getDni()).isPresent()) {
+        if (!request.getDni().isEmpty() && maestroRepository.existsByDni(request.getDni())) {
             throw new RuntimeException("El DNI que estás pasando ya existe en el sistema");
         }
+
+        Rol rol = Rol.valueOf(request.getRol());
+
         Maestro maestro = new Maestro();
         maestro.setDni(request.getDni());
         maestro.setNombre(request.getNombre());
@@ -90,7 +94,7 @@ public class AuthService {
         Usuario user = Usuario.builder()
             .username(request.getUsername())
             .password(passwordEncoder.encode(request.getPassword()))
-            .rol(Rol.USUARIO)
+            .rol(rol)
             .maestro(maestro)
             .build();
         
