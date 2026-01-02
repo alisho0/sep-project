@@ -24,15 +24,17 @@ public class Usuario implements UserDetails {
     private Long id;
     private String username;
     private String password;
+
+    @Enumerated(EnumType.STRING)
     private Rol rol;
 
     @OneToMany(mappedBy = "usuario")
     private List<Observacion> observaciones;
 
-    @OneToOne(mappedBy = "usuario", cascade = CascadeType.REMOVE)
+    @OneToOne(mappedBy = "usuario", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Maestro maestro;
 
-    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Token> tokens;
 
     @Override
