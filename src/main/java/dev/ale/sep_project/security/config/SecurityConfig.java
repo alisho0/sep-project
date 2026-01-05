@@ -2,6 +2,7 @@ package dev.ale.sep_project.security.config;
 
 import java.util.List;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.boot.actuate.endpoint.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -65,8 +66,12 @@ public class SecurityConfig {
                         final String authHeader = request.getHeader("Authorization");
                         logout(authHeader);
                     })
-                    .logoutSuccessHandler((request, response, authentication) -> 
-                        SecurityContextHolder.clearContext()
+                    .logoutSuccessHandler((request, response, authentication) -> {
+                                response.setStatus(HttpServletResponse.SC_OK);
+                                response.setContentType("application/json");
+                                response.getWriter().write("{\"message\":\"Logout exitoso\"}");
+                                SecurityContextHolder.clearContext();
+                            }
                     ))
             .build();
     }
