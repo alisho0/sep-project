@@ -1,5 +1,6 @@
 package dev.ale.sep_project.controllers;
 
+import dev.ale.sep_project.dtos.usuarios.CambioPasswordDTO;
 import dev.ale.sep_project.dtos.usuarios.UsuarioCompletoDTO;
 import dev.ale.sep_project.dtos.usuarios.UsuarioEditarDTO;
 import dev.ale.sep_project.dtos.usuarios.UsuarioResponseDTO;
@@ -10,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/usuario")
@@ -40,12 +42,21 @@ public class UsuarioController {
     @PutMapping("/editar/{id}")
     public ResponseEntity<?> modificarUsuario(@PathVariable Long id, @RequestBody UsuarioEditarDTO usuario) {
         try {
-            System.out.println("Lo que llega acá id: " + id);
-            System.out.println("Lo que llega acá data: " + usuario);
             UsuarioResponseDTO usu = usuarioService.editarUsuario(id, usuario);
             return ResponseEntity.ok(usu);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al editar el usuario");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PutMapping("/cambiarPassword/{id}")
+    public ResponseEntity<?> modificarPassword(@PathVariable Long id, @RequestBody CambioPasswordDTO dto) {
+        try {
+            //System.out.println("El id: " + id + " - " + "El json de pass: " + dto);k
+            usuarioService.cambiarPassword(id, dto);
+            return ResponseEntity.ok("Contraseña cambiada correctamente");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
         }
     }
 

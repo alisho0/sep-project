@@ -1,5 +1,6 @@
 package dev.ale.sep_project.services;
 
+import dev.ale.sep_project.dtos.usuarios.CambioPasswordDTO;
 import dev.ale.sep_project.dtos.usuarios.UsuarioCompletoDTO;
 import dev.ale.sep_project.dtos.usuarios.UsuarioEditarDTO;
 import dev.ale.sep_project.dtos.usuarios.UsuarioResponseDTO;
@@ -10,6 +11,7 @@ import dev.ale.sep_project.models.Usuario;
 import dev.ale.sep_project.repository.UsuarioRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,6 +20,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class UsuarioService {
     private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
     public List<UsuarioResponseDTO> listarUsuarios() {
         List<UsuarioResponseDTO> usuarios = usuarioRepository.findAll().stream()
@@ -60,8 +63,13 @@ public class UsuarioService {
         Usuario usu = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", id));
         try {
-            usu.setUsername(usuDTO.getUsername());
-            usu.setRol(Rol.valueOf(usuDTO.getRol()));
+            if (usuDTO.getRol() != null && !usu.getRol().name().equals(usuDTO.getRol())) {
+                usu.setRol(Rol.valueOf(usuDTO.getRol()));
+            }
+
+            if (!usu.getUsername().equals(usuDTO.getUsername()) && usuDTO.getUsername() != null) {
+                usu.setUsername(usuDTO.getUsername());
+            }
 
             // Actualizar datos del maestro asociado
             Maestro maestro = usu.getMaestro();
@@ -81,6 +89,24 @@ public class UsuarioService {
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Transactional
+    public void cambiarPassword(Long id, CambioPasswordDTO dto) {
+            Usuario usuario = usuarioRepository.findById(id)
+                    .orElseThrow(() -> new ResourceNotFoundException("Usuario", id));
+
+            // Validando la contraseña actual
+            if (!passwordEncoder.matches(dto.getContrasenia(), usuario.getPassword())) {
+                throw new RuntimeException("La contraseña actual es incorrecta");
+            }
+            // Validación de la nueva
+            if (!dto.getNuevaContrasenia().equals(dto.getConfirmarContrasenia())) {
+                throw new RuntimeException("La nueva contraseña y la confirmación no coinciden");
+            }
+
+            usuario.setPassword(passwordEncoder.encode(dto.getNuevaContrasenia()));
+            usuarioRepository.save(usuario);
     }
 
     private String capitalizarEnum(Rol rol) {
