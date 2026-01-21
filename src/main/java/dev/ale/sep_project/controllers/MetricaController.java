@@ -32,4 +32,22 @@ public class MetricaController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
+    @GetMapping("/grados-asignados/{id}")
+    public ResponseEntity<?> mostrarGradosAsignadosPorAnio(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(metricaService.countGradosAsignados(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/alumnos-asignados/{id}")
+    public ResponseEntity<?> mostrarAlumnosAsignadosPorAnio(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(metricaService.countAlumnosAsignados(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
 }

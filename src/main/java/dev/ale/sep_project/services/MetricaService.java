@@ -1,11 +1,17 @@
 package dev.ale.sep_project.services;
 
 import java.time.LocalDate;
+import java.time.ZoneId;
+import java.util.Date;
+import java.util.stream.Collectors;
 
 import dev.ale.sep_project.dtos.metricas.MetricasCicloSeccionGradoDTO;
 import dev.ale.sep_project.exceptions.ResourceNotFoundException;
 import dev.ale.sep_project.models.CicloGrado;
+import dev.ale.sep_project.models.RegistroAlumno;
+import dev.ale.sep_project.models.Usuario;
 import dev.ale.sep_project.repository.CicloGradoRepository;
+import dev.ale.sep_project.repository.UsuarioRepository;
 import org.springframework.stereotype.Service;
 
 import dev.ale.sep_project.repository.AlumnoRepository;
@@ -19,6 +25,7 @@ public class MetricaService {
     private final ObservacionRepository observacionRepository;
     private final AlumnoRepository alumnoRepository;
     public final CicloGradoRepository cicloGradoRepository;
+    public final UsuarioRepository usuarioRepository;
 
     public Long observacionesRecientes(Long dias) {
         try {
@@ -44,7 +51,7 @@ public class MetricaService {
                     .filter(r -> r.getAlumno().getDiscapacidad())
                     .count();
 
-            System.out.println(cantDisc);
+            //System.out.println(cantDisc);
             return MetricasCicloSeccionGradoDTO.builder()
                     .cantAlumnos((long) cicloGrado.getRegistros().size())
                     .cantDiscapacidad(cantDisc)
@@ -52,5 +59,31 @@ public class MetricaService {
         } catch (ResourceNotFoundException e) {
             throw new RuntimeException(e.getMessage());
         }
+    }
+
+    public Long countGradosAsignados(Long id) {
+        Usuario u = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", id));
+        int anioActual = LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires")).getYear();
+        return u.getMaestro()
+                .getCiclos()
+                .stream()
+                .filter(c -> c.getAnio() == anioActual)
+                .count();
+    }
+
+    public Long countAlumnosAsignados(Long id) {
+        Usuario u = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", id));
+        int anioActual = LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires")).getYear();
+
+        return u.getMaestro()
+                .getCiclos()
+                .stream()
+                .filter(c -> c.getAnio() == anioActual)
+                .flatMap(cicloGrado -> cicloGrado.getRegistros().stream())
+                .map(RegistroAlumno::getAlumno)
+                .distinct()
+                .count();
     }
 }
