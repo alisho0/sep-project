@@ -14,7 +14,7 @@ public class AlumnoDetalleDTO {
     private String apellido;
     private String dni;
     private String domicilio;
-    private Boolean discapacidad;
+    private List<String> discapacidades;
     private String detalleDiscap;
     private List<TutorRespuestaDTO> tutores;
     // private List<RegistroAlumnoDTO> registros;

@@ -120,7 +120,7 @@ public class AlumnoService {
             List<AlumnoResponseDTO> alumnosDTO = new ArrayList<>();
 
             for (Alumno alu : alumnos) {
-                System.out.println("El alumno es: " + alu.getNombre() + " " + alu.getApellido());
+                //System.out.println("El alumno es: " + alu.getNombre() + " " + alu.getApellido());
                 RegistroAlumno ultimoRegistro = alu.getRegistroAlumno().stream()
                         .sorted(Comparator.comparing(RegistroAlumno::getFechaInicio).reversed())
                         .findFirst()
@@ -170,7 +170,9 @@ public class AlumnoService {
                 .apellido(alumno.getApellido())
                 .dni(alumno.getDni())
                 .domicilio(alumno.getDomicilio())
-                .discapacidad(alumno.getDiscapacidad())
+                .discapacidades(alumno.getDiscapacidades().stream()
+                        .map(Discapacidad::getNombre)
+                        .toList())
                 .detalleDiscap(alumno.getDetalleDiscap())
                 .tutores(alumno.getTutores().stream()
                         .map(tutor -> TutorRespuestaDTO.builder()
