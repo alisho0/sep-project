@@ -61,7 +61,7 @@ public class MetricaService {
         }
     }
 
-    public Long countGradosAsignados(Long id) {
+    public Long countGradosAsignadosInAnioActual(Long id) {
         Usuario u = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", id));
         int anioActual = LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires")).getYear();
@@ -72,7 +72,7 @@ public class MetricaService {
                 .count();
     }
 
-    public Long countAlumnosAsignados(Long id) {
+    public Long countAlumnosAsignadosInAnioActual(Long id) {
         Usuario u = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", id));
         int anioActual = LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires")).getYear();
@@ -85,5 +85,17 @@ public class MetricaService {
                 .map(RegistroAlumno::getAlumno)
                 .distinct()
                 .count();
+    }
+
+    public Long countObservacionesRealizadasInAnioActual(Long id) {
+        Usuario u = usuarioRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", id));
+        int anioActual = LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires")).getYear();
+
+        Long countObservaciones = observacionRepository.countObservacionesByUsuarioAndAnio(u.getId(), anioActual);
+        System.out.println("Se mandó: " + anioActual + " y el id: " + u.getId());
+        System.out.println("El que manda: " + u.getUsername() + " | id del maestro: " + u.getMaestro().getId() + " | id del usuario: " +
+                u.getId() + " | nombre del maestro: " + u.getMaestro().getNombre() + " " + u.getMaestro().getApellido());
+        return countObservaciones;
     }
 }

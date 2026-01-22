@@ -36,7 +36,7 @@ public class MetricaController {
     @GetMapping("/grados-asignados/{id}")
     public ResponseEntity<?> mostrarGradosAsignadosPorAnio(@PathVariable Long id) {
         try {
-            return ResponseEntity.ok(metricaService.countGradosAsignados(id));
+            return ResponseEntity.ok(metricaService.countGradosAsignadosInAnioActual(id));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
@@ -45,7 +45,16 @@ public class MetricaController {
     @GetMapping("/alumnos-asignados/{id}")
     public ResponseEntity<?> mostrarAlumnosAsignadosPorAnio(@PathVariable Long id) {
         try {
-            return ResponseEntity.ok(metricaService.countAlumnosAsignados(id));
+            return ResponseEntity.ok(metricaService.countAlumnosAsignadosInAnioActual(id));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        }
+    }
+
+    @GetMapping("/observaciones-por-año/{id}")
+    public ResponseEntity<?> mostrarObservacionesRealizadasPorAnio(@PathVariable Long id) {
+        try {
+            return ResponseEntity.ok(metricaService.countObservacionesRealizadasInAnioActual(id));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
