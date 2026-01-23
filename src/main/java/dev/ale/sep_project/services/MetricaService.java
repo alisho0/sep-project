@@ -93,9 +93,6 @@ public class MetricaService {
         int anioActual = LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires")).getYear();
 
         Long countObservaciones = observacionRepository.countObservacionesByUsuarioAndAnio(u.getId(), anioActual);
-        System.out.println("Se mandó: " + anioActual + " y el id: " + u.getId());
-        System.out.println("El que manda: " + u.getUsername() + " | id del maestro: " + u.getMaestro().getId() + " | id del usuario: " +
-                u.getId() + " | nombre del maestro: " + u.getMaestro().getNombre() + " " + u.getMaestro().getApellido());
         return countObservaciones;
     }
 }

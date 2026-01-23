@@ -8,4 +8,5 @@ import dev.ale.sep_project.models.Actividad;
 
 public interface ActividadRepository extends CrudRepository<Actividad, Long> {
     Page<Actividad> findAllByOrderByFechaDesc(Pageable pageable);
+    Page<Actividad> findByUsuarioIdOrderByFechaDesc(Long usuarioId, Pageable pageable);
 }
