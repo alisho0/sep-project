@@ -43,7 +43,7 @@ public class ActividadService {
     public List<ActividadDTO> obtenerUltimas(int limite, Usuario usuario) {
         Pageable pageable = PageRequest.of(0, limite);
 
-        if (usuario.getRol().name().equals("ADMIN")) {
+        if (usuario.getRol().name().equals("ADMIN") || usuario.getRol().name().equals("DIRECTOR")) {
             return actividadRepository.findAllByOrderByFechaDesc(pageable).getContent()
                     .stream()
                     .map(act -> new ActividadDTO(act.getId(),

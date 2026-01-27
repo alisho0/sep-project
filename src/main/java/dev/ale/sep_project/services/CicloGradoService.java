@@ -8,8 +8,9 @@ import dev.ale.sep_project.dtos.grados.CicloDetalleDTO;
 import dev.ale.sep_project.dtos.maestros.MaestroAsignarCicloDTO;
 import dev.ale.sep_project.models.GradoSeccionTurno;
 import dev.ale.sep_project.models.Maestro;
-import dev.ale.sep_project.repository.GradoSeccionTurnoRepository;
-import dev.ale.sep_project.repository.MaestroRepository;
+import dev.ale.sep_project.models.Usuario;
+import dev.ale.sep_project.repository.*;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import dev.ale.sep_project.dtos.grados.CicloCreateDTO;
 import dev.ale.sep_project.dtos.grados.CiclosGradoDTO;
@@ -17,8 +18,6 @@ import dev.ale.sep_project.dtos.grados.GradoCiclosDTO;
 import dev.ale.sep_project.exceptions.BusinessLogicException;
 import dev.ale.sep_project.exceptions.ResourceNotFoundException;
 import dev.ale.sep_project.models.CicloGrado;
-import dev.ale.sep_project.repository.CicloGradoRepository;
-import dev.ale.sep_project.repository.GradoRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -28,6 +27,7 @@ public class CicloGradoService {
     private final GradoSeccionTurnoRepository gradoSeccionTurnoRepository;
     private final GradoRepository gradoRepository;
     private final MaestroRepository maestroRepository;
+    private final UsuarioRepository usuarioRepository;
 
     public void crearCiclo(CicloCreateDTO cicloDto) {
         GradoSeccionTurno grado = gradoSeccionTurnoRepository.findById(cicloDto.getId_grado_seccion_grado())
@@ -52,28 +52,41 @@ public class CicloGradoService {
         nuevoCiclo.setGradoSeccionTurno(grado);
         cicloGradoRepository.save(nuevoCiclo);
     }
+    public List<CiclosGradoDTO> listarCiclosPorUsuario(Authentication auth) {
+        Usuario usuario = usuarioRepository.findByUsername(auth.getName())
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-    public List<GradoCiclosDTO> listarCiclosGrado(Long gradoId) {
-        GradoSeccionTurno grado = gradoSeccionTurnoRepository.findById(gradoId)
-            .orElseThrow(() -> new ResourceNotFoundException("GradoSeccionTurno", gradoId));
-        
-        return grado.getCicloGrado().stream()
-            .map(ciclo -> GradoCiclosDTO.builder()
-                .id(ciclo.getId())
-                .anio(ciclo.getAnio())
-                .cantAlumnos(ciclo.getRegistros().size())
-                .build())
-            .toList();
-    }
-    public List<GradoCiclosDTO> listarCiclosByGrado(List<CicloGrado> ciclos) {
+        List<CicloGrado> ciclos = cicloGradoRepository.findByMaestros_Usuario_Id(usuario.getId());
+
         return ciclos.stream()
-                .map(c -> GradoCiclosDTO.builder()
+                .map(c -> CiclosGradoDTO.builder()
                         .id(c.getId())
+                        .gradoId(c.getGradoSeccionTurno().getGrado().getId())
                         .anio(c.getAnio())
-                        .cantAlumnos(c.getRegistros().size())
+                        .grado(c.getGradoSeccionTurno().getGrado().getNroGrado())
+                        .seccion(c.getGradoSeccionTurno().getSeccion().getLetra())
+                        .turno(c.getGradoSeccionTurno().getTurno().getNombreTurno())
                         .build())
                 .toList();
     }
+
+
+    public List<GradoCiclosDTO> listarCiclosGrado(Long gradoId) {
+
+        GradoSeccionTurno grado = gradoSeccionTurnoRepository.findById(gradoId)
+                .orElseThrow(() -> new ResourceNotFoundException("GradoSeccionTurno", gradoId));
+
+        return grado.getCicloGrado().stream()
+                .map(this::buildDto)
+                .toList();
+    }
+
+    public List<GradoCiclosDTO> listarCiclosByGrado(List<CicloGrado> ciclos) {
+        return ciclos.stream()
+                .map(this::buildDto)
+                .toList();
+    }
+
 
     public void eliminarCicloGrado(Long id) {
         try {
@@ -178,5 +191,13 @@ public class CicloGradoService {
         }
 
         cicloGradoRepository.save(cicloGrado);
+    }
+
+    private GradoCiclosDTO buildDto(CicloGrado ciclo) {
+        return GradoCiclosDTO.builder()
+                .id(ciclo.getId())
+                .anio(ciclo.getAnio())
+                .cantAlumnos(ciclo.getRegistros().size())
+                .build();
     }
 }

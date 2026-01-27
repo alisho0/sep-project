@@ -22,4 +22,6 @@ public interface CicloGradoRepository extends CrudRepository<CicloGrado, Long> {
     boolean existsByAnioAndGradoSeccionTurno(int anio, GradoSeccionTurno grado);
 
     List<CicloGrado> findByGradoSeccionTurno_Grado_NroGrado(int nroGrado);
+
+    List<CicloGrado> findByMaestros_Usuario_Id(Long usuarioId);
 }

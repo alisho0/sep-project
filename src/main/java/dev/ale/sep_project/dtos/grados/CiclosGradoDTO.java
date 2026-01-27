@@ -8,6 +8,7 @@ import lombok.Data;
 public class CiclosGradoDTO {
     private Long id;
     private int grado;
+    private Long gradoId;
     private String seccion;
     private String turno;
     private int anio;

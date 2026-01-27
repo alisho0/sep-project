@@ -3,6 +3,7 @@ package dev.ale.sep_project.controllers;
 import dev.ale.sep_project.dtos.maestros.MaestroAsignarCicloDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import dev.ale.sep_project.dtos.grados.CicloCreateDTO;
@@ -49,6 +50,14 @@ public class GradoCicloController {
     public ResponseEntity<?> listarCiclos() {
         try {
             return ResponseEntity.ok(cicloGradoService.getCiclosDisponibles());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Hubo un problema al listar los grados");
+        }
+    }
+    @GetMapping("/listar-por-usuario")
+    public ResponseEntity<?> listarCiclosPorUsuario(Authentication auth) {
+        try {
+            return ResponseEntity.ok(cicloGradoService.listarCiclosPorUsuario(auth));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Hubo un problema al listar los grados");
         }
