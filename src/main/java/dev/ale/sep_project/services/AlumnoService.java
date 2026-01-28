@@ -8,6 +8,9 @@ import java.util.stream.Collectors;
 import dev.ale.sep_project.dtos.alumnos.*;
 import dev.ale.sep_project.models.*;
 import dev.ale.sep_project.repository.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -184,6 +187,28 @@ public class AlumnoService {
                         .collect(Collectors.toList()))
                 .build();
 
+    }
+
+    public List<AlumnoResponseDTO> searchAlumnos(String query) {
+        Pageable pageable = PageRequest.of(0, 10); // primera página, 10 resultados
+        Page<Alumno> page = alumnoRepository.findByNombreContainingIgnoreCaseOrDniContaining(query, query, pageable);
+        return page.stream()
+                .map(a -> {
+                    RegistroAlumno ultimoRegistro = a.getRegistroAlumno().stream()
+                            .sorted(Comparator.comparing(RegistroAlumno::getFechaInicio).reversed())
+                            .findFirst()
+                            .orElse(null);
+                    return AlumnoResponseDTO.builder()
+                            .id(a.getId())
+                            .nombre(a.getNombre())
+                            .apellido(a.getApellido())
+                            .dni(a.getDni())
+                            .ultGrado(ultimoRegistro != null ? ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getGrado().getNroGrado() : 0)
+                            .seccionGrado(ultimoRegistro != null ? ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getSeccion().getLetra() : "Sin registrar")
+                            .turno(ultimoRegistro != null ? ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getTurno().getNombreTurno(): "Sin registrar")
+                            .build();
+                })
+                .collect(Collectors.toList());
     }
 
     @Transactional

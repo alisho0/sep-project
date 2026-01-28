@@ -1,11 +1,8 @@
 package dev.ale.sep_project.controllers;
 
+import dev.ale.sep_project.dtos.alumnos.*;
 import org.springframework.web.bind.annotation.RestController;
 
-import dev.ale.sep_project.dtos.alumnos.AlumnoCreateDTO;
-import dev.ale.sep_project.dtos.alumnos.AlumnoDetalleDTO;
-import dev.ale.sep_project.dtos.alumnos.AlumnoResponseDTO;
-import dev.ale.sep_project.dtos.alumnos.AlumnoUpdateDTO;
 import dev.ale.sep_project.models.Alumno;
 import dev.ale.sep_project.services.AlumnoService;
 import lombok.RequiredArgsConstructor;
@@ -100,6 +97,16 @@ public class AlumnoController {
             return ResponseEntity.ok("Tutor asignado al alumno correctamente");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al asignar tutor al alumno: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/buscar")
+    public ResponseEntity<?> buscarAlumno(@RequestParam String nombre) {
+        try {
+            List<AlumnoResponseDTO> alumnos = alumnoService.searchAlumnos(nombre);
+            return ResponseEntity.ok(alumnos);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al buscar el alumno: " + e.getMessage());
         }
     }
 }
