@@ -1,23 +1,21 @@
 package dev.ale.sep_project.services;
 
+import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
+import dev.ale.sep_project.dtos.alumnos.AlumnoInscriptoDTO;
 import dev.ale.sep_project.dtos.alumnos.AlumnoResponseDTO;
-import dev.ale.sep_project.dtos.grados.CicloDetalleDTO;
+import dev.ale.sep_project.dtos.grados.*;
 import dev.ale.sep_project.dtos.maestros.MaestroAsignarCicloDTO;
-import dev.ale.sep_project.models.GradoSeccionTurno;
-import dev.ale.sep_project.models.Maestro;
-import dev.ale.sep_project.models.Usuario;
+import dev.ale.sep_project.models.*;
 import dev.ale.sep_project.repository.*;
+import jakarta.transaction.Transactional;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
-import dev.ale.sep_project.dtos.grados.CicloCreateDTO;
-import dev.ale.sep_project.dtos.grados.CiclosGradoDTO;
-import dev.ale.sep_project.dtos.grados.GradoCiclosDTO;
 import dev.ale.sep_project.exceptions.BusinessLogicException;
 import dev.ale.sep_project.exceptions.ResourceNotFoundException;
-import dev.ale.sep_project.models.CicloGrado;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -28,6 +26,8 @@ public class CicloGradoService {
     private final GradoRepository gradoRepository;
     private final MaestroRepository maestroRepository;
     private final UsuarioRepository usuarioRepository;
+    private final AlumnoRepository alumnoRepository;
+    private final RegistroAlumnoRepository registroAlumnoRepository;
 
     public void crearCiclo(CicloCreateDTO cicloDto) {
         GradoSeccionTurno grado = gradoSeccionTurnoRepository.findById(cicloDto.getId_grado_seccion_grado())
@@ -199,5 +199,35 @@ public class CicloGradoService {
                 .anio(ciclo.getAnio())
                 .cantAlumnos(ciclo.getRegistros().size())
                 .build();
+    }
+
+    @Transactional
+    public AlumnoInscriptoDTO agregarAlumno(Long cicloId, AsignarAlumnoRequest request) {
+        Alumno alumno = alumnoRepository.findById(request.getAlumnoId())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", request.getAlumnoId()));
+        CicloGrado cicloGrado = cicloGradoRepository.findById(cicloId)
+                .orElseThrow(() -> new ResourceNotFoundException("CicloGrado", cicloId));
+
+        boolean anioRepetido = alumno.getRegistroAlumno().stream()
+                .anyMatch(r -> r.getCicloGrado().getAnio() == cicloGrado.getAnio());
+
+        if (anioRepetido) {
+            throw new RuntimeException("El alumno ya tiene un registro este año - " + cicloGrado.getAnio());
+        } else {
+            RegistroAlumno registroAlumno = RegistroAlumno.builder()
+                    .alumno(alumno)
+                    .cicloGrado(cicloGrado)
+                    .fechaInicio(LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires")))
+                    .build();
+            RegistroAlumno r = registroAlumnoRepository.save(registroAlumno);
+
+            return AlumnoInscriptoDTO.builder()
+                    .id(alumno.getId())
+                    .nombre(alumno.getNombre() + " " + alumno.getApellido())
+                    .dni(alumno.getDni())
+                    .idRegistro(r.getId())
+                    .build();
+        }
+
     }
 }

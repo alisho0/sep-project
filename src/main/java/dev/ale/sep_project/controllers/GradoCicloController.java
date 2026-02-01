@@ -1,5 +1,6 @@
 package dev.ale.sep_project.controllers;
 
+import dev.ale.sep_project.dtos.grados.AsignarAlumnoRequest;
 import dev.ale.sep_project.dtos.maestros.MaestroAsignarCicloDTO;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -101,4 +102,14 @@ public class GradoCicloController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al asignar un maestro: " + e.getMessage());
         }
     }
+
+    @PostMapping("/{idCiclo}/alumno")
+    public ResponseEntity<?> aniadirAlumno(@PathVariable Long idCiclo, @RequestBody AsignarAlumnoRequest request) {
+        try {
+         return ResponseEntity.ok(cicloGradoService.agregarAlumno(idCiclo, request));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al asignar un alumno: " + e.getMessage());
+        }
+    }
+
 }

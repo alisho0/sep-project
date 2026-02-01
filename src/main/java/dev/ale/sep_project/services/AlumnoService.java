@@ -119,7 +119,7 @@ public class AlumnoService {
     public List<AlumnoResponseDTO> obtenerAlumnos() throws Exception {
         try {
             List<Alumno> alumnos = (List<Alumno>) alumnoRepository.findAll();
-            System.out.println("Alumnos encontrados: " + alumnos.size());
+            //System.out.println("Alumnos encontrados: " + alumnos.size());
             List<AlumnoResponseDTO> alumnosDTO = new ArrayList<>();
 
             for (Alumno alu : alumnos) {
