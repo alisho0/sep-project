@@ -52,7 +52,10 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authRequest -> 
                 authRequest
-                    .requestMatchers("/auth/**").permitAll()
+                    .requestMatchers("/auth/login", "/auth/logout").permitAll()
+                    .requestMatchers("/usuario/eliminar/{id}", "/grado/listar",
+                            "/grado/detalle/{id}", "/ciclo/crearCiclo", "/ciclo/{idCiclo}/maestros/{idMaestro}",
+                            "/ciclo/{idCiclo}/maestros/{idMaestro}").hasAnyRole("ADMIN, DIRECTOR")
                     .anyRequest().authenticated()
                     )
             .sessionManagement(sessionManager ->
