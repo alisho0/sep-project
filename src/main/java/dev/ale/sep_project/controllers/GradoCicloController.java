@@ -63,7 +63,10 @@ public class GradoCicloController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Hubo un problema al listar los grados");
         }
     }
-    
+    /*
+    * Lista a los grados disponibles para asignar a un alumno.
+    * (modificar para que solo se muestren los que están activos)
+    *  */
     @GetMapping("/disponibles")
     public ResponseEntity<?> listarDisponibles() {
         try {

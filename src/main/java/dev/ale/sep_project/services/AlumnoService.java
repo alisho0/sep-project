@@ -6,6 +6,9 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import dev.ale.sep_project.dtos.alumnos.*;
+import dev.ale.sep_project.exceptions.BusinessLogicException;
+import dev.ale.sep_project.exceptions.ResourceAlreadyExistsException;
+import dev.ale.sep_project.exceptions.ResourceNotFoundException;
 import dev.ale.sep_project.models.*;
 import dev.ale.sep_project.repository.*;
 import org.springframework.data.domain.Page;
@@ -32,12 +35,10 @@ public class AlumnoService {
     private final DiscapacidadRepository discapacidadRepository;
 
     @Transactional
-    public AlumnoResponseDTO crearAlumno(AlumnoCreateDTO alumnoDto) throws Exception {
+    public AlumnoResponseDTO crearAlumno(AlumnoCreateDTO alumnoDto) {
         if (alumnoRepository.findByDni(alumnoDto.getDni()).isPresent()) {
-            throw new Exception("Ya existe un alumno con el DNI: " + alumnoDto.getDni());
+            throw new ResourceAlreadyExistsException("Ya existe un alumno con el DNI: " + alumnoDto.getDni());
         }
-        try {
-
             // Crear alumno solo con datos básicos
             Alumno alumno = new Alumno();
             alumno.setNombre(alumnoDto.getNombre());
@@ -51,7 +52,7 @@ public class AlumnoService {
                 List<Discapacidad> discapacidades = discapacidadRepository.findAllById(ids).stream().toList();
 
                 if (discapacidades.size() != ids.size()) {
-                    throw new Exception("Alguna discapacidad no existe");
+                    throw new ResourceNotFoundException("Alguna discapacidad no existe");
                 }
 
                 alumno.setDiscapacidades(discapacidades);
@@ -64,11 +65,8 @@ public class AlumnoService {
             }
 
             for (Long tutorId : alumnoDto.getTutoresIds()) {
-                if (!tutorRepository.existsById(tutorId)) {
-                    throw new Exception("El tutor con ID " + tutorId + " no existe");
-                }
                 Tutor tutor = tutorRepository.findById(tutorId)
-                        .orElseThrow(() -> new Exception("El tutor con ID " + tutorId + " no existe"));
+                        .orElseThrow(() -> new ResourceNotFoundException("Tutor", tutorId));
                 alumno.getTutores().add(tutor);
             }
             
@@ -78,13 +76,13 @@ public class AlumnoService {
             RegistroAlumno primerRegistro = new RegistroAlumno();
 
             if (!gradoService.existeGrado(alumnoDto.getNroGrado(), alumnoDto.getSeccionGrado(), alumnoDto.getTurnoGrado())) {
-                throw new Exception("No existe el grado enviado");
+                throw new ResourceNotFoundException("No existe el grado enviado");
             }
             // traemos el grado
             GradoSeccionTurno grado = gradoService.getGradoByNroSeccionTurno(alumnoDto.getNroGrado(), alumnoDto.getSeccionGrado(), alumnoDto.getTurnoGrado());
 
             if (!cicloGradoService.existeCicloGrado(alumnoDto.getAnioCicloGrado(), grado)) {
-                throw new Exception("No existe el ciclo grado enviado");
+                throw new ResourceNotFoundException("No existe el ciclo grado enviado");
             }
 
             CicloGrado ciclo = cicloGradoService.getCicloGrado(alumnoDto.getAnioCicloGrado(), grado);
@@ -99,7 +97,7 @@ public class AlumnoService {
             RegistroAlumno ultimoRegistro = alumno.getRegistroAlumno().stream()
                 .sorted(Comparator.comparing(RegistroAlumno::getFechaInicio).reversed())
                 .findFirst()
-                .orElseThrow(() -> new Exception("No se encontraron registros"));
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontraron registros"));
 
             return AlumnoResponseDTO.builder()
                 .id(alumno.getId())
@@ -110,9 +108,6 @@ public class AlumnoService {
                 .turno(ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getTurno().getNombreTurno() != null ? ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getTurno().getNombreTurno() : "Sin turno")
                 .ultGrado(ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getGrado().getNroGrado() != 0 ? ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getGrado().getNroGrado() : 0)
                 .build();
-        } catch (Exception e) {
-            throw new Exception("Error al crear el alumno: " + e.getMessage());
-        }
     }
 
     // Metodo que traer todos los alumnos con detalles mínimos.
@@ -149,24 +144,26 @@ public class AlumnoService {
     }
 
     public List<AlumnoInscriptoDTO> listarAlumnosPorCSG(Long idCiclo) {
-        try {
-            List<RegistroAlumno> registros = registroAlumnoRepository.findByCicloGrado_Id(idCiclo);
-            return registros.stream()
-                    .map(r -> new AlumnoInscriptoDTO(
-                            r.getAlumno().getId(),
-                            r.getAlumno().getNombre() + " " + r.getAlumno().getApellido(),
-                            r.getAlumno().getDni(),
-                            r.getId()
-                    ))
-                    .toList();
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+
+        List<RegistroAlumno> registros = registroAlumnoRepository.findByCicloGrado_Id(idCiclo);
+        if (registros.isEmpty()) {
+            throw new ResourceNotFoundException("No se encontraron alumnos para el ciclo con ID " + idCiclo);
         }
+
+        return registros.stream()
+                .map(r -> new AlumnoInscriptoDTO(
+                        r.getAlumno().getId(),
+                        r.getAlumno().getNombre() + " " + r.getAlumno().getApellido(),
+                        r.getAlumno().getDni(),
+                        r.getId()
+                ))
+                .toList();
+
     }
 
     // Obtiene el detalle de UN alumno
     public AlumnoDetalleDTO obtenerAlumno(Long id) {
-        Alumno alumno = alumnoRepository.findById(id).orElseThrow(() -> new RuntimeException("El alumno no existe"));
+        Alumno alumno = alumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Alumno", id));
         return AlumnoDetalleDTO.builder()
                 .id(alumno.getId())
                 .nombre(alumno.getNombre())
@@ -192,6 +189,9 @@ public class AlumnoService {
     public List<AlumnoResponseDTO> searchAlumnos(String query) {
         Pageable pageable = PageRequest.of(0, 10); // primera página, 10 resultados
         Page<Alumno> page = alumnoRepository.findByNombreContainingIgnoreCaseOrDniContaining(query, query, pageable);
+        if (page.isEmpty()) {
+            throw new ResourceNotFoundException("No se encontraron alumnos con la solicitud ingresada.");
+        }
         return page.stream()
                 .map(a -> {
                     RegistroAlumno ultimoRegistro = a.getRegistroAlumno().stream()
@@ -212,10 +212,9 @@ public class AlumnoService {
     }
 
     @Transactional
-    public void eliminarAlumno(Long id) throws Exception {
-        try {
+    public void eliminarAlumno(Long id) {
             Alumno alumno = alumnoRepository.findById(id)
-                .orElseThrow(() -> new Exception("El alumno no existe"));
+                .orElseThrow(() -> new ResourceNotFoundException("Alumno", id));
 
             // 1. Remover referencias de tutores
             for (Tutor tutor : alumno.getTutores()) {
@@ -232,19 +231,12 @@ public class AlumnoService {
             
             // 4. Ahora sí podemos eliminar el alumno
             alumnoRepository.delete(alumno);
-        } catch (Exception e) {
-            throw new Exception("Error al eliminar el alumno: " + e.getMessage());
-        }
     }
 
     // Creo que puedo utilizar el DTO de creación, tiene la misma estructura, solo
     // habría que sacarle la lista de tutores, o adaptarla para no mandar nada
-    public void actualizarAlumno(Long id, AlumnoUpdateDTO alumnoDto) throws Exception {
-        try {
-            if (!alumnoRepository.existsById(id)) {
-                throw new Exception("El alumno no existe");
-            }
-            Alumno alumno = alumnoRepository.findById(id).orElseThrow(() -> new Exception("El alumno no existe"));
+    public void actualizarAlumno(Long id, AlumnoUpdateDTO alumnoDto) {
+            Alumno alumno = alumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Alumno", id));
             alumno.setNombre(alumnoDto.getNombre());
             alumno.setApellido(alumnoDto.getApellido());
             alumno.setDiscapacidad(alumnoDto.getDiscapacidad());
@@ -252,21 +244,19 @@ public class AlumnoService {
             alumno.setDomicilio(alumnoDto.getDomicilio());
             alumno.setDni(alumnoDto.getDni());
             alumnoRepository.save(alumno);
-        } catch (Exception e) {
-            throw new Exception(e.getMessage().toString());
-        }
     }
 
     @Transactional
-    public RegistroAlumno crearRegistroAlumno(Long alumnoId, Integer nroGrado, String seccion, String turno, Integer anioCiclo) throws Exception {
-        try {
+    public RegistroAlumno crearRegistroAlumno(Long alumnoId, Integer nroGrado, String seccion, String turno, Integer anioCiclo) {
             // Buscar alumno
             Alumno alumno = alumnoRepository.findById(alumnoId)
-                .orElseThrow(() -> new Exception("El alumno no existe"));
+                .orElseThrow(() -> new ResourceNotFoundException("Alumno", alumnoId));
 
             // Buscar o crear grado
             GradoSeccionTurno grado = gradoService.getGradoByNroSeccionTurno(nroGrado, seccion, turno);
-
+            if (grado == null) {
+                throw new ResourceNotFoundException("Grado no encontrado");
+            }
             // Buscar o crear ciclo
             CicloGrado cicloGrado = cicloGradoRepository.findByAnio(anioCiclo)
                 .orElseGet(() -> {
@@ -287,37 +277,29 @@ public class AlumnoService {
             // Solo guardamos el alumno, el registro se guarda en cascada
             alumnoRepository.save(alumno);
             return registro;
-        } catch (Exception e) {
-            throw new Exception("Error al crear el registro: " + e.getMessage());
-        }
     }
 
-    public TutorListaDTO agregarTutor(Long alumnoId, Long tutorId) throws Exception {
-        try {
-            Alumno alumno = alumnoRepository.findById(alumnoId)
-                .orElseThrow(() -> new Exception("El alumno no existe"));
-            Tutor tutor = tutorRepository.findById(tutorId)
-                .orElseThrow(() -> new Exception("El tutor no existe"));
+    public TutorListaDTO agregarTutor(Long alumnoId, Long tutorId) {
 
-            if (alumno.getTutores().contains(tutor)) {
-                throw new Exception("El tutor ya está asociado al alumno");
-            }
+        Alumno alumno = alumnoRepository.findById(alumnoId).orElseThrow(() -> new ResourceNotFoundException("Alumno", alumnoId));
+        Tutor tutor = tutorRepository.findById(tutorId).orElseThrow(() -> new ResourceNotFoundException("Tutor", tutorId));
 
-            alumno.getTutores().add(tutor);
-            tutor.getAlumnos().add(alumno);
+        if (alumno.getTutores().contains(tutor)) {
+            throw new ResourceAlreadyExistsException("El tutor ya está asociado al alumno");
+        }
 
-            alumnoRepository.save(alumno);
-            tutorRepository.save(tutor);
+        alumno.getTutores().add(tutor);
+        tutor.getAlumnos().add(alumno);
 
-            return TutorListaDTO.builder()
+        alumnoRepository.save(alumno);
+        tutorRepository.save(tutor);
+
+        return TutorListaDTO.builder()
                 .id(tutor.getId())
                 .nombre(tutor.getNombre())
                 .apellido(tutor.getApellido())
                 .dni(tutor.getDni())
                 .domicilio(tutor.getDomicilio())
                 .build();
-        } catch (Exception e) {
-            throw new Exception("Error al agregar el tutor: " + e.getMessage());
-        }
     }
 }
