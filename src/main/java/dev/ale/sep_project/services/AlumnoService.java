@@ -111,8 +111,7 @@ public class AlumnoService {
     }
 
     // Metodo que traer todos los alumnos con detalles mínimos.
-    public List<AlumnoResponseDTO> obtenerAlumnos() throws Exception {
-        try {
+    public List<AlumnoResponseDTO> obtenerAlumnos() {
             List<Alumno> alumnos = (List<Alumno>) alumnoRepository.findAll();
             //System.out.println("Alumnos encontrados: " + alumnos.size());
             List<AlumnoResponseDTO> alumnosDTO = new ArrayList<>();
@@ -138,9 +137,6 @@ public class AlumnoService {
             }
 
             return alumnosDTO;
-        } catch (Exception e) {
-            throw new Exception(e.getMessage().toString());
-        }
     }
 
     public List<AlumnoInscriptoDTO> listarAlumnosPorCSG(Long idCiclo) {

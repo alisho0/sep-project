@@ -33,80 +33,49 @@ public class AlumnoController {
 
     @PostMapping("/crear")
     public ResponseEntity<?> crearAlumno(@RequestBody AlumnoCreateDTO alumno) {
-        try {
-            AlumnoResponseDTO alu = alumnoService.crearAlumno(alumno);
-            return ResponseEntity.status(HttpStatus.CREATED).body(alu);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al crear alumno" + e.getMessage());
-        }
+        AlumnoResponseDTO alu = alumnoService.crearAlumno(alumno);
+        return ResponseEntity.status(HttpStatus.CREATED).body(alu);
     }
 
     @GetMapping("/detalle/{id}")
     public ResponseEntity<?> obtenerDetalleAlumno(@PathVariable Long id) {
-        try {
-            AlumnoDetalleDTO alumnoDetalle = alumnoService.obtenerAlumno(id);
-            return ResponseEntity.ok(alumnoDetalle);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al obtener detalle del alumno: " + e.getMessage());
-        }
+        AlumnoDetalleDTO alumnoDetalle = alumnoService.obtenerAlumno(id);
+        return ResponseEntity.ok(alumnoDetalle);
     }
     
     @GetMapping("/listar")
     public ResponseEntity<?> listarAlumnos() {
-        try {
-            List<AlumnoResponseDTO> alumnos = alumnoService.obtenerAlumnos();
-            return ResponseEntity.ok(alumnos);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al listar alumnos: " + e.getMessage());
-        }
+        List<AlumnoResponseDTO> alumnos = alumnoService.obtenerAlumnos();
+        return ResponseEntity.ok(alumnos);
     }
 
     @GetMapping("listarPorCSG/{id}")
     public ResponseEntity<?> listarPorCSG(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(alumnoService.listarAlumnosPorCSG(id));
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró alumnos en la sección mandada.");
-        }
+        return ResponseEntity.ok(alumnoService.listarAlumnosPorCSG(id));
     }
 
     @PutMapping("/actualizar/{id}")
     public ResponseEntity<?> actualizarAlumno(@PathVariable Long id, @RequestBody AlumnoUpdateDTO alumnoDto) {
-        try {
-            alumnoService.actualizarAlumno(id, alumnoDto);
-            return ResponseEntity.ok("Alumno actualizado correctamente");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al actualizar alumno: " + e.getMessage());
-        }
+        alumnoService.actualizarAlumno(id, alumnoDto);
+        return ResponseEntity.ok("Alumno actualizado correctamente");
+
     }
     
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<?> eliminarAlumno(@PathVariable Long id) {
-        try {
-            alumnoService.eliminarAlumno(id);
-            return ResponseEntity.ok("Alumno eliminado correctamente");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al eliminar alumno: " + e.getMessage());
-        }
+        alumnoService.eliminarAlumno(id);
+        return ResponseEntity.ok("Alumno eliminado correctamente");
     }
 
     @PutMapping("/asignarTutor/{idAlumno}/{idTutor}")
     public ResponseEntity<?> asignarTutor(@PathVariable Long idAlumno, @PathVariable Long idTutor) {
-        try {
-            alumnoService.agregarTutor(idAlumno, idTutor);
-            return ResponseEntity.ok("Tutor asignado al alumno correctamente");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al asignar tutor al alumno: " + e.getMessage());
-        }
+        alumnoService.agregarTutor(idAlumno, idTutor);
+        return ResponseEntity.ok("Tutor asignado al alumno correctamente");
     }
 
     @GetMapping("/buscar")
     public ResponseEntity<?> buscarAlumno(@RequestParam String nombre) {
-        try {
-            List<AlumnoResponseDTO> alumnos = alumnoService.searchAlumnos(nombre);
-            return ResponseEntity.ok(alumnos);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al buscar el alumno: " + e.getMessage());
-        }
+        List<AlumnoResponseDTO> alumnos = alumnoService.searchAlumnos(nombre);
+        return ResponseEntity.ok(alumnos);
     }
 }

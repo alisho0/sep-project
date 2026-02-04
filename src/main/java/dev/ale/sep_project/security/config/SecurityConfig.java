@@ -53,9 +53,9 @@ public class SecurityConfig {
             .authorizeHttpRequests(authRequest -> 
                 authRequest
                     .requestMatchers("/auth/login", "/auth/logout").permitAll()
-                    .requestMatchers("/usuario/eliminar/{id}", "/grado/listar",
-                            "/grado/detalle/{id}", "/ciclo/crearCiclo", "/ciclo/{idCiclo}/maestros/{idMaestro}",
-                            "/ciclo/{idCiclo}/maestros/{idMaestro}").hasAnyRole("ADMIN, DIRECTOR")
+                    //.requestMatchers("/usuario/eliminar/{id}", "/grado/listar",
+                      //      "/grado/detalle/{id}", "/ciclo/crearCiclo", "/ciclo/{idCiclo}/maestros/{idMaestro}",
+                        //    "/ciclo/{idCiclo}/maestros/{idMaestro}").hasAnyRole("ADMIN, DIRECTOR")
                     .anyRequest().authenticated()
                     )
             .sessionManagement(sessionManager ->
