@@ -2,9 +2,11 @@ package dev.ale.sep_project.services;
 
 import dev.ale.sep_project.dtos.maestros.MaestroResponseDTO;
 import dev.ale.sep_project.dtos.maestros.MaestrosAsignadosDTO;
+import dev.ale.sep_project.exceptions.BusinessLogicException;
 import dev.ale.sep_project.models.Maestro;
 import dev.ale.sep_project.repository.MaestroRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -24,8 +26,8 @@ public class MaestroService {
                             .correo(m.getUsuario().getUsername())
                             .build())
                     .toList();
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
+        } catch (DataAccessException e) {
+            throw new BusinessLogicException("Error al listar los maestros asignados");
         }
     }
 
@@ -37,8 +39,8 @@ public class MaestroService {
                     .toList();
 
             return maestrosRespuesta;
-        } catch (RuntimeException e) {
-            throw new RuntimeException("No se pudo listar los maestros: " + e.getMessage());
+        } catch (DataAccessException e) {
+            throw new BusinessLogicException("No se pudo listar los maestros: " + e.getMessage());
         }
     }
 }

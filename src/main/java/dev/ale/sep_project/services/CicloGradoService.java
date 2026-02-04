@@ -9,6 +9,7 @@ import dev.ale.sep_project.dtos.alumnos.AlumnoInscriptoDTO;
 import dev.ale.sep_project.dtos.alumnos.AlumnoResponseDTO;
 import dev.ale.sep_project.dtos.grados.*;
 import dev.ale.sep_project.dtos.maestros.MaestroAsignarCicloDTO;
+import dev.ale.sep_project.exceptions.ResourceAlreadyExistsException;
 import dev.ale.sep_project.models.*;
 import dev.ale.sep_project.repository.*;
 import jakarta.transaction.Transactional;
@@ -38,7 +39,7 @@ public class CicloGradoService {
             .anyMatch(ciclo -> ciclo.getAnio() == cicloDto.getAnio());
         
         if (cicloExistente) {
-            throw new BusinessLogicException(
+            throw new ResourceAlreadyExistsException(
                 String.format("Ya existe un ciclo para el grado %d° %s turno %s en el año %d",
                     grado.getGrado().getNroGrado(),
                     grado.getSeccion().getLetra(),
@@ -54,9 +55,12 @@ public class CicloGradoService {
     }
     public List<CiclosGradoDTO> listarCiclosPorUsuario(Authentication auth) {
         Usuario usuario = usuarioRepository.findByUsername(auth.getName())
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario no encontrado"));
 
         List<CicloGrado> ciclos = cicloGradoRepository.findByMaestros_Usuario_Id(usuario.getId());
+        if (ciclos == null) {
+            throw new ResourceNotFoundException("No se encontraron los ciclos para el usuario con ID " + usuario.getId());
+        }
 
         return ciclos.stream()
                 .map(c -> CiclosGradoDTO.builder()
@@ -89,13 +93,9 @@ public class CicloGradoService {
 
 
     public void eliminarCicloGrado(Long id) {
-        try {
-            CicloGrado ciclo = cicloGradoRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("Ciclo", id));
-            cicloGradoRepository.delete(ciclo);
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
-        }
+        CicloGrado ciclo = cicloGradoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Ciclo", id));
+        cicloGradoRepository.delete(ciclo);
     }
 
     public List<Long> getCiclosDisponibles() {
@@ -107,6 +107,7 @@ public class CicloGradoService {
             .orElseThrow(() -> new ResourceNotFoundException("Ciclo", cicloId));
     }
 
+    // finalizar metodo
     public void finalizarCiclo(Long cicloId) {
         CicloGrado ciclo = obtenerCiclo(cicloId);
         // Aquí podrías agregar lógica para finalizar un ciclo
@@ -212,7 +213,7 @@ public class CicloGradoService {
                 .anyMatch(r -> r.getCicloGrado().getAnio() == cicloGrado.getAnio());
 
         if (anioRepetido) {
-            throw new RuntimeException("El alumno ya tiene un registro este año - " + cicloGrado.getAnio());
+            throw new BusinessLogicException("El alumno ya tiene un registro este año " + cicloGrado.getAnio());
         } else {
             RegistroAlumno registroAlumno = RegistroAlumno.builder()
                     .alumno(alumno)

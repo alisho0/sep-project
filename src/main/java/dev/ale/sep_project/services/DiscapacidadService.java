@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import dev.ale.sep_project.exceptions.ResourceNotFoundException;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import dev.ale.sep_project.dtos.discapacidades.DiscapacidadesListDTO;
@@ -16,38 +18,33 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class DiscapacidadService {
     private final DiscapacidadRepository discapacidadRepository;
-    
+
     public DiscapacidadesListDTO crearDiscapacidad(String nombre) {
         try {
-            
             Discapacidad discapacidad = Discapacidad.builder()
-                .nombre(nombre)
-                .build();
+                    .nombre(nombre)
+                    .build();
             Discapacidad disc = discapacidadRepository.save(discapacidad);
             return new DiscapacidadesListDTO(disc.getId(), disc.getNombre());
-        } catch (Exception e) {
-            throw new BusinessLogicException("Error al crear una discapacidad");
+        } catch (DataAccessException e) {
+            throw new BusinessLogicException("Error al crear una discapacidad - " + e);
         }
     }
 
     public List<DiscapacidadesListDTO> listarDiscapacidades() {
-        try {
-            List<Discapacidad> discapacidades = (List<Discapacidad>) discapacidadRepository.findAll();
-            return discapacidades.stream()
+        return discapacidadRepository.findAll().stream()
                 .map(d -> new DiscapacidadesListDTO(d.getId(), d.getNombre()))
                 .collect(Collectors.toList());
-        } catch (BusinessLogicException e) {
-            throw new BusinessLogicException("Error al listar discapacidades");
-        }
     }
 
+
     public void borrarDiscapacidad(Long id) {
+        Discapacidad dis = discapacidadRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("discapacidad", id));
         try {
-            Discapacidad dis = discapacidadRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("discapacidad", id));
             discapacidadRepository.delete(dis);
-        } catch (BusinessLogicException e) {
-            throw new BusinessLogicException("Error al eliminar una discapacidad" + e.getMessage());
+        } catch (DataIntegrityViolationException e) {
+            throw new BusinessLogicException("Error al eliminar una discapacidad" + e);
         }
     }
 }

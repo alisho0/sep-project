@@ -28,14 +28,8 @@ public class MetricaService {
     public final UsuarioRepository usuarioRepository;
 
     public Long observacionesRecientes(Long dias) {
-        try {
-            LocalDate fechaLimite = LocalDate.now().minusDays(dias);
-            return observacionRepository.countByFechaAfter(fechaLimite);
-
-        } catch (Exception e) {
-            new Exception("No se pudieron obtener las observaciones recientes" + " - " + e.getMessage());
-            return 0L;
-        }
+        LocalDate fechaLimite = LocalDate.now().minusDays(dias);
+        return observacionRepository.countByFechaAfter(fechaLimite);
     }
 
     public Long alumnosTotales() {
@@ -43,22 +37,16 @@ public class MetricaService {
     }
 
     public MetricasCicloSeccionGradoDTO getMetricasPorGradoSeccion(Long id) {
-        try {
-            CicloGrado cicloGrado = cicloGradoRepository.findById(id)
-                    .orElseThrow(() -> new ResourceNotFoundException("CicloGrado", id));
-            System.out.println(cicloGrado.getId());
-            Long cantDisc = cicloGrado.getRegistros().stream()
-                    .filter(r -> r.getAlumno().getDiscapacidad())
-                    .count();
+        CicloGrado cicloGrado = cicloGradoRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("CicloGrado", id));
+        Long cantDisc = cicloGrado.getRegistros().stream()
+                .filter(r -> r.getAlumno().getDiscapacidad())
+                .count();
 
-            //System.out.println(cantDisc);
-            return MetricasCicloSeccionGradoDTO.builder()
-                    .cantAlumnos((long) cicloGrado.getRegistros().size())
-                    .cantDiscapacidad(cantDisc)
-                    .build();
-        } catch (ResourceNotFoundException e) {
-            throw new RuntimeException(e.getMessage());
-        }
+        return MetricasCicloSeccionGradoDTO.builder()
+                .cantAlumnos((long) cicloGrado.getRegistros().size())
+                .cantDiscapacidad(cantDisc)
+                .build();
     }
 
     public Long countGradosAsignadosInAnioActual(Long id) {

@@ -40,7 +40,7 @@ public class GradoService {
                     .toList();
 
             Long cantAlumnos = alumnoRepository.countByRegistroAlumno_CicloGrado_GradoSeccionTurno_Grado_NroGrado(nroGrado.longValue());
-            Grado grado = gradoRepository.findByNroGrado(nroGrado).orElseThrow(() -> new BusinessLogicException("Grado no encontrado"));
+            Grado grado = gradoRepository.findByNroGrado(nroGrado).orElseThrow(() -> new ResourceNotFoundException("Grado no encontrado"));
             GradoListaDTO dto = GradoListaDTO.builder()
                     .id(grado.getId())
                     .grado(nroGrado)

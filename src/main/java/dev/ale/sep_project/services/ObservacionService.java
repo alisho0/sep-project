@@ -91,23 +91,18 @@ public class ObservacionService {
         CicloGrado cicloGrado = cicloGradoRepository.findById(idCiclo)
                 .orElseThrow(() -> new ResourceNotFoundException("CicloGrado", idCiclo));
 
-        try {
-            List<ObservacionDTO> respuesta = cicloGrado.getRegistros().stream()
-                    .flatMap(r -> r.getObservaciones().stream()
-                            .map(o -> ObservacionDTO.builder()
-                                            .id(o.getId())
-                                            .contenido(o.getContenido())
-                                            .fecha(o.getFecha())
-                                            //.nombreUsuario(o.getUsuario().getMaestro().getNombre() + " " + o.getUsuario().getMaestro().getApellido())
-                                            .nombreUsuario(o.getUsuario() != null ? o.getUsuario().getUsername() : "Sin usuario")
-                                            .alumno(o.getRegistroAlumno().getAlumno().getNombre() + " " + o.getRegistroAlumno().getAlumno().getApellido())
-                                            .build()
-                            ))
-                            .toList();
-            return respuesta;
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Error creando el listado de observaciones por ciclo. " + e.getMessage());
-        }
-
+        List<ObservacionDTO> respuesta = cicloGrado.getRegistros().stream()
+                .flatMap(r -> r.getObservaciones().stream()
+                        .map(o -> ObservacionDTO.builder()
+                                .id(o.getId())
+                                .contenido(o.getContenido())
+                                .fecha(o.getFecha())
+                                //.nombreUsuario(o.getUsuario().getMaestro().getNombre() + " " + o.getUsuario().getMaestro().getApellido())
+                                .nombreUsuario(o.getUsuario() != null ? o.getUsuario().getUsername() : "Sin usuario")
+                                .alumno(o.getRegistroAlumno().getAlumno().getNombre() + " " + o.getRegistroAlumno().getAlumno().getApellido())
+                                .build()
+                        ))
+                .toList();
+        return respuesta;
     }
 }

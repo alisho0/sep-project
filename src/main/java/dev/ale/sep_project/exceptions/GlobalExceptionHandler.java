@@ -1,5 +1,6 @@
 package dev.ale.sep_project.exceptions;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -63,4 +64,12 @@ public class GlobalExceptionHandler {
             .status(HttpStatus.INTERNAL_SERVER_ERROR)
             .body("Error interno del servidor: " + ex.getMessage());
     }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<?> handleDataAccess(DataAccessException e) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("Error interno del sistema");
+    }
+
 }

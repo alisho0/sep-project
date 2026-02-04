@@ -3,6 +3,7 @@ package dev.ale.sep_project.services;
 import java.util.ArrayList;
 import java.util.List;
 
+import dev.ale.sep_project.exceptions.ResourceAlreadyExistsException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -41,63 +42,55 @@ public class TutorService {
     public TutorListaDTO crearTutor(TutorCreateDTO tutorDTO) {
         if (tutorRepository.findByDni(tutorDTO.getDni()).isPresent()) {
             // Manejar el caso en que el tutor ya existe
-            throw new RuntimeException("El tutor ya existe");
+            throw new ResourceAlreadyExistsException("El tutor ya existe");
         }
         // Lógica para crear y guardar el tutor
-        try {
-            Tutor tutor = construirTutorDesdeDTO(tutorDTO); // Inicializar la lista de alumnos como null o una lista vacía
-            tutorRepository.save(tutor);
-            return TutorListaDTO.builder()
+        Tutor tutor = construirTutorDesdeDTO(tutorDTO); // Inicializar la lista de alumnos como null o una lista vacía
+        tutorRepository.save(tutor);
+
+        return TutorListaDTO.builder()
                 .id(tutor.getId())
                 .nombre(tutor.getNombre())
                 .apellido(tutor.getApellido())
                 .dni(tutor.getDni())
                 .domicilio(tutor.getDomicilio())
                 .build();
-        } catch (Exception e) {
-            throw new RuntimeException("Error al crear el tutor" + " - " + e.getMessage());
-        }
     }
 
     @Transactional
     public TutorListaDTO crearTutorConAlumno(TutorCreateDTO tutorDTO) {
         if (tutorRepository.findByDni(tutorDTO.getDni()).isPresent()) {
-            throw new BusinessLogicException("Ya existe un tutor con el DNI: " + tutorDTO.getDni());
+            throw new ResourceAlreadyExistsException("Ya existe un tutor con el DNI: " + tutorDTO.getDni());
         }
-        try {
-            Tutor tutor = construirTutorDesdeDTO(tutorDTO);
+        Tutor tutor = construirTutorDesdeDTO(tutorDTO);
             
             // Primero guardamos el tutor
-            tutorRepository.save(tutor);
+        tutorRepository.save(tutor);
 
-            if (tutorDTO.getIdAlumno() != null) {
-                var alumno = alumnoRepository.findById(tutorDTO.getIdAlumno())
+        if (tutorDTO.getIdAlumno() != null) {
+            var alumno = alumnoRepository.findById(tutorDTO.getIdAlumno())
                     .orElseThrow(() -> new ResourceNotFoundException("Alumno", tutorDTO.getIdAlumno()));
                 
                 // Establecemos la relación bidireccional
-                tutor.getAlumnos().add(alumno);
-                alumno.getTutores().add(tutor);
+            tutor.getAlumnos().add(alumno);
+            alumno.getTutores().add(tutor);
                 
                 // Guardamos ambas entidades
-                alumnoRepository.save(alumno);
-                tutorRepository.save(tutor);
-            }
+            alumnoRepository.save(alumno);
+            tutorRepository.save(tutor);
+        }
             
-            return TutorListaDTO.builder()
+        return TutorListaDTO.builder()
                 .id(tutor.getId())
                 .nombre(tutor.getNombre())
                 .apellido(tutor.getApellido())
                 .dni(tutor.getDni())
                 .domicilio(tutor.getDomicilio())
                 .build();
-        } catch (ResourceNotFoundException e) {
-            throw e;
-        } catch (Exception e) {
-            throw new BusinessLogicException("Error al crear el tutor: " + e.getMessage());
-        }
     }
 
     public List<TutorRespuestaDTO> listarTutores() {
+        //hace pageable
         List<Tutor> tutores = (List<Tutor>) tutorRepository.findAll();
         return tutores.stream()
                 .map(tutor -> TutorRespuestaDTO.builder()

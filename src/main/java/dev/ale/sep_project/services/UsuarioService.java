@@ -4,6 +4,7 @@ import dev.ale.sep_project.dtos.usuarios.CambioPasswordDTO;
 import dev.ale.sep_project.dtos.usuarios.UsuarioCompletoDTO;
 import dev.ale.sep_project.dtos.usuarios.UsuarioEditarDTO;
 import dev.ale.sep_project.dtos.usuarios.UsuarioResponseDTO;
+import dev.ale.sep_project.exceptions.BusinessLogicException;
 import dev.ale.sep_project.exceptions.ResourceNotFoundException;
 import dev.ale.sep_project.models.Maestro;
 import dev.ale.sep_project.models.Rol;
@@ -36,14 +37,14 @@ public class UsuarioService {
 
     public void eliminarUsuario(Long id) {
         if (!usuarioRepository.existsById(id)) {
-            throw new RuntimeException("El usuario con id " + id + " no existe");
+            throw new ResourceNotFoundException("Usuario", id);
         }
         usuarioRepository.deleteById(id);
     }
 
     public UsuarioCompletoDTO obtenerUsuarioCompleto(Long id) {
         Usuario usuario = usuarioRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", id));
 
         Maestro maestro = usuario.getMaestro();
 
@@ -62,33 +63,41 @@ public class UsuarioService {
     public UsuarioResponseDTO editarUsuario(Long id, UsuarioEditarDTO usuDTO) {
         Usuario usu = usuarioRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", id));
-        try {
-            if (usuDTO.getRol() != null && !usu.getRol().name().equals(usuDTO.getRol())) {
-                usu.setRol(Rol.valueOf(usuDTO.getRol()));
-            }
 
-            if (!usu.getUsername().equals(usuDTO.getUsername()) && usuDTO.getUsername() != null) {
-                usu.setUsername(usuDTO.getUsername());
+        if (usuDTO.getRol() != null) {
+            try {
+                Rol nuevoRol = Rol.valueOf(usuDTO.getRol());
+                if (usu.getRol() != nuevoRol) {
+                    usu.setRol(nuevoRol);
+                }
+            } catch (IllegalArgumentException e) {
+                throw new BusinessLogicException("Rol inválido: " + usuDTO.getRol());
             }
+        }
+
+
+        if (!usu.getUsername().equals(usuDTO.getUsername()) && usuDTO.getUsername() != null) {
+            usu.setUsername(usuDTO.getUsername());
+        }
 
             // Actualizar datos del maestro asociado
-            Maestro maestro = usu.getMaestro();
-            if (maestro != null) {
+        Maestro maestro = usu.getMaestro();
+        if (maestro != null) {
                 maestro.setNombre(usuDTO.getNombre());
                 maestro.setApellido(usuDTO.getApellido());
                 maestro.setDni(usuDTO.getDni());
                 maestro.setDomicilio(usuDTO.getDomicilio());
-            }
+        }
+        String nombreCompleto = maestro != null
+                ? maestro.getNombre() + " " + maestro.getApellido()
+                : null;
 
-            return UsuarioResponseDTO.builder()
+        return UsuarioResponseDTO.builder()
                     .id(usu.getId())
                     .username(usu.getUsername())
-                    .nombreCompleto(maestro.getNombre() + " " + maestro.getApellido())
+                    .nombreCompleto(nombreCompleto)
                     .rol(usu.getRol().name())
                     .build();
-        } catch (RuntimeException e) {
-            throw new RuntimeException(e);
-        }
     }
 
     @Transactional
@@ -98,11 +107,11 @@ public class UsuarioService {
 
             // Validando la contraseña actual
             if (!passwordEncoder.matches(dto.getContrasenia(), usuario.getPassword())) {
-                throw new RuntimeException("La contraseña actual es incorrecta");
+                throw new BusinessLogicException("La contraseña actual es incorrecta");
             }
             // Validación de la nueva
             if (!dto.getNuevaContrasenia().equals(dto.getConfirmarContrasenia())) {
-                throw new RuntimeException("La nueva contraseña y la confirmación no coinciden");
+                throw new BusinessLogicException("La nueva contraseña y la confirmación no coinciden");
             }
 
             usuario.setPassword(passwordEncoder.encode(dto.getNuevaContrasenia()));
