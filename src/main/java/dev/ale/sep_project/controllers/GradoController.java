@@ -23,40 +23,22 @@ public class GradoController {
     
     @GetMapping("/listar")
     public ResponseEntity<?> listarGrados() {
-        try {
-            return ResponseEntity.ok(gradoService.listarGrados());
-        } catch (Exception e) {
-            // TODO: handle exception
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al listar grados");
-        }
+        return ResponseEntity.ok(gradoService.listarGrados());
     }
     
     @GetMapping("/detalle/{id}")
     public ResponseEntity<?> gradoDetalle(@PathVariable Long id) {
-        try {
-            return ResponseEntity.ok(gradoService.detalleGrado(id));
-        } catch (Exception e) {
-            // TODO: handle exception
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al listar los ciclos");
-        }
+        return ResponseEntity.ok(gradoService.detalleGrado(id));
     }
 
     @GetMapping("/disponibles")
     public ResponseEntity<?> listarDisponibles() {
-        try {
-            return ResponseEntity.ok(gradoService.getGrados());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ocurrió un problema al listar los grados disponibles");
-        }
+        return ResponseEntity.ok(gradoService.getGrados());
     }
 
     @GetMapping("/secciones")
     public ResponseEntity<?> listarSecciones() {
-        try {
-            return ResponseEntity.ok(gradoService.getSecciones());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Ocurrió un problema al listar las secciones disponibles");
-        }
+        return ResponseEntity.ok(gradoService.getSecciones());
     }
     
 }

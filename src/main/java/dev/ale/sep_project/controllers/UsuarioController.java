@@ -21,52 +21,31 @@ public class UsuarioController {
 
     @GetMapping("/listar")
     public ResponseEntity<?> listUsuarios() {
-        try {
-            List<UsuarioResponseDTO> usuarios = usuarioService.listarUsuarios();
-            return ResponseEntity.ok(usuarios);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al listar los usuarios");
-        }
+        List<UsuarioResponseDTO> usuarios = usuarioService.listarUsuarios();
+        return ResponseEntity.ok(usuarios);
     }
 
     @GetMapping("/detalle/{id}")
     public ResponseEntity<?> obtenerUsuario(@PathVariable Long id) {
-        try {
-            UsuarioCompletoDTO usuario = usuarioService.obtenerUsuarioCompleto(id);
-            return ResponseEntity.ok(usuario);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al traer el usuario");
-        }
+        UsuarioCompletoDTO usuario = usuarioService.obtenerUsuarioCompleto(id);
+        return ResponseEntity.ok(usuario);
     }
 
     @PutMapping("/editar/{id}")
     public ResponseEntity<?> modificarUsuario(@PathVariable Long id, @RequestBody UsuarioEditarDTO usuario) {
-        try {
-            UsuarioResponseDTO usu = usuarioService.editarUsuario(id, usuario);
-            return ResponseEntity.ok(usu);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
-        }
+        UsuarioResponseDTO usu = usuarioService.editarUsuario(id, usuario);
+        return ResponseEntity.ok(usu);
     }
 
     @PutMapping("/cambiarPassword/{id}")
     public ResponseEntity<?> modificarPassword(@PathVariable Long id, @RequestBody CambioPasswordDTO dto) {
-        try {
-            //System.out.println("El id: " + id + " - " + "El json de pass: " + dto);k
             usuarioService.cambiarPassword(id, dto);
             return ResponseEntity.ok("Contraseña cambiada correctamente");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("message", e.getMessage()));
-        }
     }
 
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<?> delUsuario(@PathVariable Long id) {
-        try {
-            usuarioService.eliminarUsuario(id);
-            return ResponseEntity.ok("Usuario eliminado correctamente.");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al eliminar usuario");
-        }
+        usuarioService.eliminarUsuario(id);
+        return ResponseEntity.ok("Usuario eliminado correctamente.");
     }
 }

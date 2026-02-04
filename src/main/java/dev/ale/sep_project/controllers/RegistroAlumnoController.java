@@ -21,12 +21,8 @@ public class RegistroAlumnoController {
 
     @PostMapping("/crear")
     public ResponseEntity<?> crearRegistro(@RequestBody RegistroCreateDTO registro) {
-        try {
-            RegistroAniosDTO r = registroAlumnoService.crearRegistro(registro);
-            return ResponseEntity.ok(r);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Hubo un problema al recibir el registro: " + e.getMessage() + " - " + e.getCause());
-        }
+        RegistroAniosDTO r = registroAlumnoService.crearRegistro(registro);
+        return ResponseEntity.ok(r);
     }
 
     @GetMapping("/detalle/{id}")

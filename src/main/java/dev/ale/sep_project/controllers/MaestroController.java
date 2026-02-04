@@ -22,21 +22,13 @@ public class MaestroController {
 
     @GetMapping("/listarAsignados/{id}")
     public ResponseEntity<?> listarMaestrosAsignados(@PathVariable Long id) {
-        try {
             List<MaestrosAsignadosDTO> asignados = maestroService.listarMaestrosAsignadosPorCSG(id);
             return ResponseEntity.ok(asignados);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
     }
 
     @GetMapping("/listarDisponibles")
     public ResponseEntity<?> listarMaestros() {
-        try {
-            List<MaestroResponseDTO> asignados = maestroService.listarMaestros();
-            return ResponseEntity.ok(asignados);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        }
+        List<MaestroResponseDTO> asignados = maestroService.listarMaestros();
+        return ResponseEntity.ok(asignados);
     }
 }

@@ -19,31 +19,19 @@ public class DiscapacidadController {
 
     @PostMapping("/crear")
     public ResponseEntity<?> crearDiscapacidad(@RequestBody String nombre) {
-        try {
-            DiscapacidadesListDTO res = discapacidadService.crearDiscapacidad(nombre);
-            return ResponseEntity.ok(res);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al crear una discapacidad");
-        }
+        DiscapacidadesListDTO res = discapacidadService.crearDiscapacidad(nombre);
+        return ResponseEntity.ok(res);
     }
     
     @GetMapping("/listar")
     public ResponseEntity<?> listarDiscapacidades() {
-        try {
-            return ResponseEntity.ok(discapacidadService.listarDiscapacidades());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No se encontraron discapacidades");
-        }
+        return ResponseEntity.ok(discapacidadService.listarDiscapacidades());
     }
 
     @DeleteMapping("/borrar/{id}")
     public ResponseEntity<?> eliminarDiscapacidad(@PathVariable Long id) {
-        try {
-            discapacidadService.borrarDiscapacidad(id);
-            return ResponseEntity.ok("Discapacidad eliminada correctamente");
-        } catch (Exception e) {
-            return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al eliminar la discapacidad");
-        }
+        discapacidadService.borrarDiscapacidad(id);
+        return ResponseEntity.ok("Discapacidad eliminada correctamente");
     }
     
 }

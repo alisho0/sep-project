@@ -30,44 +30,24 @@ public class ObservacionController {
     
     @PostMapping("/crear")
     public ResponseEntity<?> crearObservacion(@RequestBody ObservacionCreateDTO observacionDTO) {
-        try {
-            return ResponseEntity.ok(observacionService.nuevaObservacion(observacionDTO));
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (BusinessLogicException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        return ResponseEntity.ok(observacionService.nuevaObservacion(observacionDTO));
     }
 
     @GetMapping("/detalle/{id}")
     public ResponseEntity<?> detalleObservacion(@PathVariable Long id) {
-        try {
-            ObservacionDTO observacionDTO = observacionService.traerObservacion(id);
-            return ResponseEntity.ok(observacionDTO);
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        }
+        ObservacionDTO observacionDTO = observacionService.traerObservacion(id);
+        return ResponseEntity.ok(observacionDTO);
     }
     
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<?> eliminarObservacion(@PathVariable Long id) {
-        try {
-            observacionService.eliminarObservacion(id);
-            return ResponseEntity.ok("Observación eliminada exitosamente");
-        } catch (ResourceNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (BusinessLogicException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
+        observacionService.eliminarObservacion(id);
+        return ResponseEntity.ok("Observación eliminada exitosamente");
     }
 
     @GetMapping("/listar/{id}")
     public ResponseEntity<?> listarObsPorCicloGrado(@PathVariable Long id) {
-        try {
-            List<ObservacionDTO> obs = observacionService.listarObservacionesPorCicloGrado(id);
-            return ResponseEntity.ok(obs);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No se pudo listar las observaciones por ciclo" + e.getMessage());
-        }
+        List<ObservacionDTO> obs = observacionService.listarObservacionesPorCicloGrado(id);
+        return ResponseEntity.ok(obs);
     }
 }
