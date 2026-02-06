@@ -1,6 +1,9 @@
 package dev.ale.sep_project.controllers;
 
 import dev.ale.sep_project.dtos.alumnos.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.RestController;
 
 import dev.ale.sep_project.models.Alumno;
@@ -44,8 +47,12 @@ public class AlumnoController {
     }
     
     @GetMapping("/listar")
-    public ResponseEntity<?> listarAlumnos() {
-        List<AlumnoResponseDTO> alumnos = alumnoService.obtenerAlumnos();
+    public ResponseEntity<?> listarAlumnos(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<AlumnoResponseDTO> alumnos = alumnoService.obtenerAlumnos(pageable);
         return ResponseEntity.ok(alumnos);
     }
 

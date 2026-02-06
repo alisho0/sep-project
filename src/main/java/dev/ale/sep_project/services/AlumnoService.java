@@ -111,32 +111,28 @@ public class AlumnoService {
     }
 
     // Metodo que traer todos los alumnos con detalles mínimos.
-    public List<AlumnoResponseDTO> obtenerAlumnos() {
-            List<Alumno> alumnos = (List<Alumno>) alumnoRepository.findAll();
-            //System.out.println("Alumnos encontrados: " + alumnos.size());
-            List<AlumnoResponseDTO> alumnosDTO = new ArrayList<>();
+    public Page<AlumnoResponseDTO> obtenerAlumnos(Pageable pageable) {
+            Page<Alumno> alumnosPage = alumnoRepository.findAll(pageable);
 
-            for (Alumno alu : alumnos) {
-                //System.out.println("El alumno es: " + alu.getNombre() + " " + alu.getApellido());
-                RegistroAlumno ultimoRegistro = alu.getRegistroAlumno().stream()
+            Page<AlumnoResponseDTO> alumnosDTOPage = alumnosPage.map(a -> {
+
+                RegistroAlumno ultimoRegistro = a.getRegistroAlumno().stream()
                         .sorted(Comparator.comparing(RegistroAlumno::getFechaInicio).reversed())
                         .findFirst()
                         .orElse(null);
-//                System.out.println("El último registro es: " + ultimoRegistro.getFechaInicio());
-                AlumnoResponseDTO alumnoRespuesta = AlumnoResponseDTO.builder()
-                        .id(alu.getId())
-                        .nombre(alu.getNombre())
-                        .apellido(alu.getApellido())
-                        .dni(alu.getDni())
+
+                return AlumnoResponseDTO.builder()
+                        .id(a.getId())
+                        .nombre(a.getNombre())
+                        .apellido(a.getApellido())
+                        .dni(a.getDni())
                         .ultGrado(ultimoRegistro != null ? ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getGrado().getNroGrado() : 0)
                         .seccionGrado(ultimoRegistro != null ? ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getSeccion().getLetra() : "Sin registrar")
                         .turno(ultimoRegistro != null ? ultimoRegistro.getCicloGrado().getGradoSeccionTurno().getTurno().getNombreTurno(): "Sin registrar")
                         .build();
-//                System.out.println("Testeo del dto: " + alumnoRespuesta);
-                alumnosDTO.add(alumnoRespuesta);
-            }
+            });
 
-            return alumnosDTO;
+            return alumnosDTOPage;
     }
 
     public List<AlumnoInscriptoDTO> listarAlumnosPorCSG(Long idCiclo) {
