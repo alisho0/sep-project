@@ -1,17 +1,13 @@
 package dev.ale.sep_project.config;
 
-import dev.ale.sep_project.models.GradoSeccionTurno;
-import dev.ale.sep_project.models.Seccion;
-import dev.ale.sep_project.models.Turno;
-import dev.ale.sep_project.repository.GradoSeccionTurnoRepository;
-import dev.ale.sep_project.repository.SeccionRepository;
-import dev.ale.sep_project.repository.TurnoRepository;
+import dev.ale.sep_project.models.*;
+import dev.ale.sep_project.repository.*;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
-import dev.ale.sep_project.models.Grado;
-import dev.ale.sep_project.repository.GradoRepository;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -19,6 +15,7 @@ public class DataLoader implements CommandLineRunner {
 
     private final GradoRepository gradoRepository;
     private final GradoSeccionTurnoRepository gradoSeccionTurnoRepository;
+    private final CicloGradoRepository cicloGradoRepository;
     private final TurnoRepository turnoRepository;
     private final SeccionRepository seccionRepository;
 
@@ -30,6 +27,15 @@ public class DataLoader implements CommandLineRunner {
         }
     }
 
+    // aux
+    private void activarGradosCicloNulos() {
+        List<CicloGrado> cicloGrados = (List<CicloGrado>) cicloGradoRepository.findAll();
+
+        cicloGrados.forEach(c -> {
+            c.setEstado(EstadoCiclo.ACTIVO);
+            cicloGradoRepository.save(c);
+        });
+    }
     private void cargarGrados() {
         String[] turnos = {"M", "T"};
         String[] secs = {"A", "B", "C"};

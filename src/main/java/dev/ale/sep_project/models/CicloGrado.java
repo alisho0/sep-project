@@ -32,4 +32,7 @@ public class CicloGrado {
             inverseJoinColumns = @JoinColumn(name = "maestro_id")
     )
     private List<Maestro> maestros;
+
+    @Enumerated(EnumType.STRING)
+    private EstadoCiclo estado = EstadoCiclo.ACTIVO;
 }

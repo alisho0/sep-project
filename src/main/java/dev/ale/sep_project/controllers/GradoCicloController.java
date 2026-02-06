@@ -75,4 +75,9 @@ public class GradoCicloController {
         return ResponseEntity.ok(cicloGradoService.agregarAlumno(idCiclo, request));
     }
 
+    @PutMapping("/{idCiclo}/cerrar")
+    public ResponseEntity<?> cerrarCiclo(@PathVariable Long idCiclo)  {
+        cicloGradoService.cerrarCiclo(idCiclo);
+        return ResponseEntity.ok("Ciclo cerrado correctamente");
+    }
 }

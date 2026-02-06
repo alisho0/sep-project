@@ -160,6 +160,7 @@ public class CicloGradoService {
                 .seccion(ciclo.getGradoSeccionTurno().getSeccion().getLetra())
                 .turno(ciclo.getGradoSeccionTurno().getTurno().getNombreTurno())
                 .anio(ciclo.getAnio())
+                .estado(ciclo.getEstado().name())
                 .build())
             .toList();
     }
@@ -199,6 +200,7 @@ public class CicloGradoService {
                 .id(ciclo.getId())
                 .anio(ciclo.getAnio())
                 .cantAlumnos(ciclo.getRegistros().size())
+                .estado(ciclo.getEstado())
                 .build();
     }
 
@@ -230,5 +232,19 @@ public class CicloGradoService {
                     .build();
         }
 
+    }
+
+    @Transactional
+    public void cerrarCiclo(Long idCiclo) {
+
+        CicloGrado cicloGrado = cicloGradoRepository.findById(idCiclo)
+                .orElseThrow(() -> new ResourceNotFoundException("CicloGrado", idCiclo));
+        if (cicloGrado.getEstado() == EstadoCiclo.CERRADO) {
+            throw new BusinessLogicException("El ciclo ya está cerrado");
+        }
+
+        cicloGrado.setEstado(EstadoCiclo.CERRADO);
+        LocalDate fechaFin = LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires"));
+        cicloGrado.getRegistros().forEach(r -> r.setFechaFin(fechaFin));
     }
 }

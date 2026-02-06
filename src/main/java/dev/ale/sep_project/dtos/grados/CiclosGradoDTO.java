@@ -12,4 +12,6 @@ public class CiclosGradoDTO {
     private String seccion;
     private String turno;
     private int anio;
+
+    private String estado;
 }

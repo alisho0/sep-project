@@ -1,5 +1,6 @@
 package dev.ale.sep_project.dtos.grados;
 
+import dev.ale.sep_project.models.EstadoCiclo;
 import lombok.Builder;
 import lombok.Data;
 
@@ -9,4 +10,5 @@ public class GradoCiclosDTO {
     private Long id; 
     private int anio;
     private int cantAlumnos;
+    private EstadoCiclo estado;
 }

@@ -25,7 +25,10 @@ public class GradoController {
     public ResponseEntity<?> listarGrados() {
         return ResponseEntity.ok(gradoService.listarGrados());
     }
-    
+
+    /*
+    * Trae el array de Secciones con los ciclos para cada sección.
+    * */
     @GetMapping("/detalle/{id}")
     public ResponseEntity<?> gradoDetalle(@PathVariable Long id) {
         return ResponseEntity.ok(gradoService.detalleGrado(id));
