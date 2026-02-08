@@ -1,7 +1,6 @@
 package dev.ale.sep_project.services;
 
-import dev.ale.sep_project.models.CicloGrado;
-import dev.ale.sep_project.models.Usuario;
+import dev.ale.sep_project.models.*;
 import dev.ale.sep_project.repository.CicloGradoRepository;
 import dev.ale.sep_project.repository.UsuarioRepository;
 import dev.ale.sep_project.security.jwt.JwtService;
@@ -13,8 +12,6 @@ import dev.ale.sep_project.dtos.observaciones.ObservacionCreateDTO;
 import dev.ale.sep_project.dtos.observaciones.ObservacionDTO;
 import dev.ale.sep_project.exceptions.BusinessLogicException;
 import dev.ale.sep_project.exceptions.ResourceNotFoundException;
-import dev.ale.sep_project.models.Observacion;
-import dev.ale.sep_project.models.RegistroAlumno;
 import dev.ale.sep_project.repository.ObservacionRepository;
 import dev.ale.sep_project.repository.RegistroAlumnoRepository;
 import jakarta.transaction.Transactional;
@@ -37,7 +34,9 @@ public class ObservacionService {
         // Validar que existe el registro
         RegistroAlumno registro = registroRepository.findById(observacionDTO.getIdRegistro())
             .orElseThrow(() -> new ResourceNotFoundException("Registro Alumno", observacionDTO.getIdRegistro()));
-
+        if (registro.getCicloGrado().getEstado() == EstadoCiclo.CERRADO) {
+            throw new BusinessLogicException("No se puede crear una observación a un ciclo cerrado.");
+        }
         // Validar datos de la observación
         if (observacionDTO.getContenido() == null || observacionDTO.getContenido().trim().isEmpty()) {
             throw new BusinessLogicException("El contenido de la observación no puede estar vacío");
@@ -83,7 +82,9 @@ public class ObservacionService {
     public void eliminarObservacion(Long id) {
         Observacion observacion = observacionRepository.findById(id)
             .orElseThrow(() -> new ResourceNotFoundException("Observación", id));
-
+        if (observacion.getRegistroAlumno().getCicloGrado().getEstado() == EstadoCiclo.CERRADO) {
+            throw new BusinessLogicException("No se puede eliminar una observación de un ciclo cerrado.");
+        }
         observacionRepository.delete(observacion);
     }
 

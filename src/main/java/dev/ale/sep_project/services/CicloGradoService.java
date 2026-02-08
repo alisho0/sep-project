@@ -170,6 +170,9 @@ public class CicloGradoService {
     public void asignarMaestroCiclo(Long idCiclo, Long idMaestro) {
         CicloGrado cicloGrado = cicloGradoRepository.findById(idCiclo)
                 .orElseThrow(() -> new ResourceNotFoundException("CicloGrado", idCiclo));
+        if (cicloGrado.getEstado() == EstadoCiclo.CERRADO) {
+            throw new BusinessLogicException("No se puede asignar un maestro a un ciclo cerrado.");
+        }
         Maestro maestro = maestroRepository.findById(idMaestro)
                 .orElseThrow(() -> new ResourceNotFoundException("Maestro", idMaestro));
 
@@ -187,6 +190,9 @@ public class CicloGradoService {
     public void desvincularMaestroCiclo(Long idCiclo, Long idMaestro) {
         CicloGrado cicloGrado = cicloGradoRepository.findById(idCiclo)
                 .orElseThrow(() -> new ResourceNotFoundException("CicloGrado", idCiclo));
+        if (cicloGrado.getEstado() == EstadoCiclo.CERRADO) {
+            throw new BusinessLogicException("No se puede desvincular un maestro de un ciclo cerrado.");
+        }
         Maestro maestro = maestroRepository.findById(idMaestro)
                 .orElseThrow(() -> new ResourceNotFoundException("Maestro", idMaestro));
 
@@ -208,10 +214,13 @@ public class CicloGradoService {
 
     @Transactional
     public AlumnoInscriptoDTO agregarAlumno(Long cicloId, AsignarAlumnoRequest request) {
-        Alumno alumno = alumnoRepository.findById(request.getAlumnoId())
-                .orElseThrow(() -> new ResourceNotFoundException("Usuario", request.getAlumnoId()));
         CicloGrado cicloGrado = cicloGradoRepository.findById(cicloId)
                 .orElseThrow(() -> new ResourceNotFoundException("CicloGrado", cicloId));
+        if (cicloGrado.getEstado() == EstadoCiclo.CERRADO) {
+            throw new BusinessLogicException("No se puede asignar un alumno a un ciclo cerrado.");
+        }
+        Alumno alumno = alumnoRepository.findById(request.getAlumnoId())
+                .orElseThrow(() -> new ResourceNotFoundException("Usuario", request.getAlumnoId()));
 
         boolean anioRepetido = alumno.getRegistroAlumno().stream()
                 .anyMatch(r -> r.getCicloGrado().getAnio() == cicloGrado.getAnio());
