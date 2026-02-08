@@ -70,6 +70,7 @@ public class CicloGradoService {
                         .grado(c.getGradoSeccionTurno().getGrado().getNroGrado())
                         .seccion(c.getGradoSeccionTurno().getSeccion().getLetra())
                         .turno(c.getGradoSeccionTurno().getTurno().getNombreTurno())
+                        .estado(c.getEstado().name())
                         .build())
                 .toList();
     }
@@ -136,7 +137,8 @@ public class CicloGradoService {
         return new CicloDetalleDTO(ciclo.getId(),
                 cantAlumnos,
                 (long) ciclo.getAnio(),
-                (long) ciclo.getGradoSeccionTurno().getGrado().getNroGrado()
+                (long) ciclo.getGradoSeccionTurno().getGrado().getNroGrado(),
+                ciclo.getEstado()
                 );
     }
 

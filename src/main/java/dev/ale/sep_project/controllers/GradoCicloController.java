@@ -30,7 +30,7 @@ public class GradoCicloController {
         return ResponseEntity.ok(cicloGradoService.listarCiclosGrado(id));
     }
 
-    @GetMapping("/detalleCiclo/{id}")
+    @GetMapping("/detalle-ciclo/{id}")
     public ResponseEntity<?> detalleSeccion(@PathVariable Long id) {
         return ResponseEntity.ok(cicloGradoService.detalleSeccion(id));
     }
