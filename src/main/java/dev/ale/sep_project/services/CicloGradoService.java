@@ -153,7 +153,7 @@ public class CicloGradoService {
     }
 
     public List<CiclosGradoDTO> getCiclosGradoDisponible() {
-        List<CicloGrado> ciclosGrados = (List<CicloGrado>) cicloGradoRepository.findAll();
+        List<CicloGrado> ciclosGrados = (List<CicloGrado>) cicloGradoRepository.findAllByEstado(EstadoCiclo.ACTIVO);
 
         return ciclosGrados.stream()
             .map(ciclo -> CiclosGradoDTO.builder()

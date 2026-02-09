@@ -3,6 +3,7 @@ package dev.ale.sep_project.repository;
 import java.util.List;
 import java.util.Optional;
 
+import dev.ale.sep_project.models.EstadoCiclo;
 import dev.ale.sep_project.models.GradoSeccionTurno;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -24,4 +25,6 @@ public interface CicloGradoRepository extends CrudRepository<CicloGrado, Long> {
     List<CicloGrado> findByGradoSeccionTurno_Grado_NroGrado(int nroGrado);
 
     List<CicloGrado> findByMaestros_Usuario_Id(Long usuarioId);
+
+    List<CicloGrado> findAllByEstado(EstadoCiclo estado);
 }

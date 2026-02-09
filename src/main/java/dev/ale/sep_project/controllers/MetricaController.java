@@ -24,6 +24,11 @@ public class MetricaController {
         return metricaService.alumnosTotales();
     }
 
+    @GetMapping("/discapacidades-totales")
+    public ResponseEntity<Long> getDiscapacidadesTotales(){
+        return ResponseEntity.ok(metricaService.countDiscapacidadesTotales());
+    }
+
     @GetMapping("/cicloDetalle/{id}")
     public ResponseEntity<?> metricasCSG(@PathVariable Long id) {
         return ResponseEntity.ok(metricaService.getMetricasPorGradoSeccion(id));

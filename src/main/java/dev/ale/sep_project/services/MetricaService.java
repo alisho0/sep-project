@@ -10,12 +10,9 @@ import dev.ale.sep_project.exceptions.ResourceNotFoundException;
 import dev.ale.sep_project.models.CicloGrado;
 import dev.ale.sep_project.models.RegistroAlumno;
 import dev.ale.sep_project.models.Usuario;
-import dev.ale.sep_project.repository.CicloGradoRepository;
-import dev.ale.sep_project.repository.UsuarioRepository;
+import dev.ale.sep_project.repository.*;
 import org.springframework.stereotype.Service;
 
-import dev.ale.sep_project.repository.AlumnoRepository;
-import dev.ale.sep_project.repository.ObservacionRepository;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -24,8 +21,9 @@ public class MetricaService {
 
     private final ObservacionRepository observacionRepository;
     private final AlumnoRepository alumnoRepository;
-    public final CicloGradoRepository cicloGradoRepository;
-    public final UsuarioRepository usuarioRepository;
+    private final CicloGradoRepository cicloGradoRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final DiscapacidadRepository discapacidadRepository;
 
     public Long observacionesRecientes(Long dias) {
         LocalDate fechaLimite = LocalDate.now().minusDays(dias);
@@ -82,5 +80,9 @@ public class MetricaService {
 
         Long countObservaciones = observacionRepository.countObservacionesByUsuarioAndAnio(u.getId(), anioActual);
         return countObservaciones;
+    }
+
+    public Long countDiscapacidadesTotales() {
+        return discapacidadRepository.count();
     }
 }
