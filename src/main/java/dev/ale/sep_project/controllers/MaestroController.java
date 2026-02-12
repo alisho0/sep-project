@@ -7,6 +7,7 @@ import dev.ale.sep_project.services.MaestroService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,12 +21,14 @@ import java.util.List;
 public class MaestroController {
     private final MaestroService maestroService;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR', 'MAESTRO')")
     @GetMapping("/listarAsignados/{id}")
     public ResponseEntity<?> listarMaestrosAsignados(@PathVariable Long id) {
             List<MaestrosAsignadosDTO> asignados = maestroService.listarMaestrosAsignadosPorCSG(id);
             return ResponseEntity.ok(asignados);
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR')")
     @GetMapping("/listarDisponibles")
     public ResponseEntity<?> listarMaestros() {
         List<MaestroResponseDTO> asignados = maestroService.listarMaestros();

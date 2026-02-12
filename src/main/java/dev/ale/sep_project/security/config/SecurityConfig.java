@@ -7,6 +7,7 @@ import org.springframework.boot.actuate.endpoint.SecurityContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -25,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
+@EnableMethodSecurity
 public class SecurityConfig {
     
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
@@ -52,7 +54,7 @@ public class SecurityConfig {
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authRequest -> 
                 authRequest
-                    .requestMatchers("/auth/login", "/auth/logout").permitAll()
+                    .requestMatchers("/auth/login", "/auth/logout", "/auth-debug").permitAll()
                     //.requestMatchers("/usuario/eliminar/{id}", "/grado/listar",
                       //      "/grado/detalle/{id}", "/ciclo/crearCiclo", "/ciclo/{idCiclo}/maestros/{idMaestro}",
                         //    "/ciclo/{idCiclo}/maestros/{idMaestro}").hasAnyRole("ADMIN, DIRECTOR")

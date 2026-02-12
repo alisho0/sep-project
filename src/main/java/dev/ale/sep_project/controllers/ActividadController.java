@@ -6,6 +6,7 @@ import dev.ale.sep_project.dtos.usuarios.ActividadDTO;
 import dev.ale.sep_project.models.Usuario;
 import dev.ale.sep_project.repository.UsuarioRepository;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +24,7 @@ public class ActividadController {
     private final ActividadService actividadService;
     private final UsuarioRepository usuarioRepository;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR', 'MAESTRO')")
     @GetMapping("/recientes")
     public ResponseEntity<?> getUltimas(@RequestParam(defaultValue = "10") int limite, Authentication auth) {
         Usuario usuario = usuarioRepository.findByUsername(auth.getName())

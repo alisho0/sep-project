@@ -1,5 +1,6 @@
 package dev.ale.sep_project.controllers;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.RestController;
 
 import dev.ale.sep_project.dtos.registros.TutorListaDTO;
@@ -32,31 +33,33 @@ import org.springframework.web.bind.annotation.PutMapping;
 public class TutorController {
     private final TutorService tutorService;
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR', 'MAESTRO')")
     @PostMapping("/crear")
     public ResponseEntity<TutorListaDTO> createTutor(@RequestBody TutorCreateDTO tutorDTO) {
         TutorListaDTO tutor = tutorService.crearTutor(tutorDTO);
         return ResponseEntity.ok(tutor);
-    } 
+    }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR', 'MAESTRO')")
     @PostMapping("/crearConAlumno")
     public ResponseEntity<?> createTutorConAlum(@RequestBody TutorCreateDTO tutorDTO) {
         TutorListaDTO tutor = tutorService.crearTutorConAlumno(tutorDTO);
         return ResponseEntity.ok(tutor);
     }
 
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR', 'MAESTRO')")
     @GetMapping("/listar")
     public ResponseEntity<List<TutorRespuestaDTO>> listarTutors() {
         List<TutorRespuestaDTO> tutores = tutorService.listarTutores();
         return ResponseEntity.ok(tutores);
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR', 'MAESTRO')")
     @GetMapping("/listar/{id}")
     public ResponseEntity<List<TutorListaDTO>> listarTutoresPorId(@PathVariable Long id) {
         List<TutorListaDTO> tutores = tutorService.listarTutoresPorAlumno(id);
         return ResponseEntity.ok(tutores);
     }
-
+    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR', 'MAESTRO')")
     @GetMapping("/detalle/{id}")
     public ResponseEntity<TutorDetalleDTO> obtenerDetalleTutor(@PathVariable Long id) {
         TutorDetalleDTO tutor = tutorService.obtenerDetalleTutor(id);
@@ -64,6 +67,7 @@ public class TutorController {
     }
     
     // Falta, editar, eliminar y detalle
+    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR')")
     @PutMapping("editar/{id}")
     public ResponseEntity<?> editarTutor(@PathVariable Long id, @RequestBody TutorCreateDTO tutorEdit) {
         try {
@@ -74,12 +78,14 @@ public class TutorController {
         }
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR')")
     @DeleteMapping("/eliminar/{id}")
     public ResponseEntity<?> borrarTutor(@PathVariable Long id) {
         tutorService.eliminarTutor(id);
         return ResponseEntity.ok("Tutor eliminado correctamente");
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR')")
     @DeleteMapping("/desvincular/{idTutor}/{idAlumno}")
     public ResponseEntity<?> desvincularTutorDeAlumno(@PathVariable Long idTutor, @PathVariable Long idAlumno) {
         try {
