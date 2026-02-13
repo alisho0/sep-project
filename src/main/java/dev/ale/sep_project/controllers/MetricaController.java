@@ -25,6 +25,11 @@ public class MetricaController {
         return metricaService.alumnosTotales();
     }
 
+    @GetMapping("alumnos-inscriptos")
+    public ResponseEntity<?> getAlumnosInscriptosLastCiclo() {
+        return ResponseEntity.ok(metricaService.alumnosTotalesByLastCiclo());
+    }
+
     @GetMapping("/discapacidades-totales")
     public ResponseEntity<Long> getDiscapacidadesTotales(){
         return ResponseEntity.ok(metricaService.countDiscapacidadesTotales());

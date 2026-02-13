@@ -34,6 +34,12 @@ public class MetricaService {
         return alumnoRepository.count();
     }
 
+    public Long alumnosTotalesByLastCiclo() {
+        int anioActual = LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires")).getYear();
+        Long alumnosCount = cicloGradoRepository.countAlumnosByAnio(anioActual);
+        return alumnosCount;
+    }
+
     public MetricasCicloSeccionGradoDTO getMetricasPorGradoSeccion(Long id) {
         CicloGrado cicloGrado = cicloGradoRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("CicloGrado", id));
