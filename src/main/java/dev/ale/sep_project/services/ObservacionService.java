@@ -59,6 +59,7 @@ public class ObservacionService {
         observacionRepository.save(observacion);
         return ObservacionDTO.builder()
                 .id(observacion.getId())
+                .idAlumno(observacion.getRegistroAlumno().getAlumno().getId())
                 .contenido(observacion.getContenido())
                 .nombreUsuario(usuario.getUsername())
                 .alumno(observacion.getRegistroAlumno().getAlumno().getNombre() + " " + observacion.getRegistroAlumno().getAlumno().getApellido() )
@@ -96,6 +97,7 @@ public class ObservacionService {
                 .flatMap(r -> r.getObservaciones().stream()
                         .map(o -> ObservacionDTO.builder()
                                 .id(o.getId())
+                                .idAlumno(o.getRegistroAlumno().getAlumno().getId())
                                 .contenido(o.getContenido())
                                 .fecha(o.getFecha())
                                 //.nombreUsuario(o.getUsuario().getMaestro().getNombre() + " " + o.getUsuario().getMaestro().getApellido())

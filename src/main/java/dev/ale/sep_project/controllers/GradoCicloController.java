@@ -85,6 +85,13 @@ public class GradoCicloController {
         return ResponseEntity.ok(cicloGradoService.agregarAlumno(idCiclo, request));
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR', 'MAESTRO')")
+    @DeleteMapping("/{idCiclo}/alumno/{idAlumno}")
+    public ResponseEntity<?> desvincularAlumno(@PathVariable Long idCiclo, @PathVariable Long idAlumno) {
+        cicloGradoService.desvincularAlumno(idCiclo, idAlumno);
+        return ResponseEntity.noContent().build();
+    }
+
     @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR')")
     @PutMapping("/{idCiclo}/cerrar")
     public ResponseEntity<?> cerrarCiclo(@PathVariable Long idCiclo)  {

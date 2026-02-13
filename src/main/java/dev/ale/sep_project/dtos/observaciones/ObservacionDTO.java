@@ -9,6 +9,7 @@ import lombok.Data;
 @Builder
 public class ObservacionDTO {
     private Long id;
+    private Long idAlumno;
     private String contenido;
     private String nombreUsuario;
     private LocalDate fecha;

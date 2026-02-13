@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import dev.ale.sep_project.dtos.alumnos.AlumnoInscriptoDTO;
 import dev.ale.sep_project.dtos.alumnos.AlumnoResponseDTO;
@@ -257,5 +258,14 @@ public class CicloGradoService {
         cicloGrado.setEstado(EstadoCiclo.CERRADO);
         LocalDate fechaFin = LocalDate.now(ZoneId.of("America/Argentina/Buenos_Aires"));
         cicloGrado.getRegistros().forEach(r -> r.setFechaFin(fechaFin));
+    }
+
+    public void desvincularAlumno(Long idCiclo, Long idAlumno) {
+        RegistroAlumno registroAlumno = registroAlumnoRepository.findByAlumnoIdAndCicloGradoId(idAlumno, idCiclo)
+                .orElseThrow(() -> new ResourceNotFoundException("No se encontró el registro de este alumno."));
+        if (registroAlumno.getCicloGrado().getEstado().equals(EstadoCiclo.CERRADO)) {
+            throw new BusinessLogicException("No se puede desvincular un alumno de un ciclo cerrado.");
+        }
+        registroAlumnoRepository.delete(registroAlumno);
     }
 }
