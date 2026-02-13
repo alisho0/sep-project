@@ -1,16 +1,27 @@
-# Sistema de Gestión Escolar (Backend)
+# Sistema Escolar Privado (SEP) | Backend
 ## 🏫 Descripción del proyecto
-Este backend implementa un sistema de gestión escolar orientado a registrar alumnos, grados, ciclos lectivos, observaciones docentes y usuarios con roles diferenciados. Está construido con Spring Boot, JPA/Hibernate, y sigue una arquitectura modular basada en entidades claras y relaciones bien definidas.
+Backend para el sistema de gestión escolar desarrollado con Spring Boot.
+Permite la administración de alumnos, grados, ciclos lectivos y usuarios con distintos niveles de acceso, implementando control de roles y relaciones complejas entre entidades.
+El proyecto fue diseñado siguiendo una arquitectura en capas, priorizando separación de responsabilidades y buenas prácticas de desarrollo backend.
 
-### 🚀 Tecnologías utilizadas
+🛠️ Stack Tecnológico
 - Java 17
 - Spring Boot
 - Spring Data JPA
+- Hibernate
 - MySQL
 - Maven
+- Arquitectura en capas
 
-### 🔐 Roles y permisos
-El sistema contempla los siguientes roles:
-- DIRECTOR: puede crear usuarios, ver todos los registros y observaciones.
-- MAESTRO: puede registrar observaciones y consultar alumnos asignados.
-- ADMIN: acceso completo (gestión técnica).
+🔐 Seguridad
+- Autenticación basada en JWT
+- Roles diferenciados: MAESTRO y DIRECTOR
+- Restricción de endpoints según permisos
+
+📌 Funcionalidades principales
+- Alta, edición y consulta de alumnos
+- Gestión de grados y ciclos lectivos
+- Relación entre alumnos y grados mediante asociaciones JPA
+- Registro de observaciones docentes
+- Métricas básicas para análisis académico
+- Manejo de errores centralizado
