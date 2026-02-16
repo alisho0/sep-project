@@ -2,6 +2,7 @@ package dev.ale.sep_project.dtos.alumnos;
 
 import java.util.List;
 
+import dev.ale.sep_project.dtos.discapacidades.DiscapacidadesListDTO;
 import dev.ale.sep_project.dtos.tutor.TutorRespuestaDTO;
 import lombok.Builder;
 import lombok.Data;
@@ -14,7 +15,7 @@ public class AlumnoDetalleDTO {
     private String apellido;
     private String dni;
     private String domicilio;
-    private List<String> discapacidades;
+    private List<DiscapacidadesListDTO> discapacidades;
     private String detalleDiscap;
     private List<TutorRespuestaDTO> tutores;
     // private List<RegistroAlumnoDTO> registros;

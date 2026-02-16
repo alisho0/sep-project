@@ -17,6 +17,7 @@ public class AlumnoCreateDTO {
     private String dni;
     @NotNull(message = "El domicilio no puede ser nulo")
     private String domicilio;
+
     private Boolean discapacidad;
     private List<Long> discapacidadesSeleccionadas;
     private String detalleDiscap;

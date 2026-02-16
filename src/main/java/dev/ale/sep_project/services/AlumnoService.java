@@ -1,11 +1,13 @@
 package dev.ale.sep_project.services;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import dev.ale.sep_project.dtos.alumnos.*;
+import dev.ale.sep_project.dtos.discapacidades.DiscapacidadesListDTO;
 import dev.ale.sep_project.exceptions.BusinessLogicException;
 import dev.ale.sep_project.exceptions.ResourceAlreadyExistsException;
 import dev.ale.sep_project.exceptions.ResourceNotFoundException;
@@ -163,7 +165,7 @@ public class AlumnoService {
                 .dni(alumno.getDni())
                 .domicilio(alumno.getDomicilio())
                 .discapacidades(alumno.getDiscapacidades().stream()
-                        .map(Discapacidad::getNombre)
+                        .map(d -> new DiscapacidadesListDTO(d.getId(), d.getNombre()))
                         .toList())
                 .detalleDiscap(alumno.getDetalleDiscap())
                 .tutores(alumno.getTutores().stream()
@@ -231,10 +233,27 @@ public class AlumnoService {
             Alumno alumno = alumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Alumno", id));
             alumno.setNombre(alumnoDto.getNombre());
             alumno.setApellido(alumnoDto.getApellido());
-            alumno.setDiscapacidad(alumnoDto.getDiscapacidad());
-            alumno.setDetalleDiscap(alumnoDto.getDetalleDiscap());
             alumno.setDomicilio(alumnoDto.getDomicilio());
             alumno.setDni(alumnoDto.getDni());
+
+            if (Boolean.TRUE.equals(alumnoDto.getDiscapacidad())) {
+                List<Discapacidad> discapacidades = discapacidadRepository.findAllById(alumnoDto.getDiscapacidadesSeleccionadas());
+                if (discapacidades.isEmpty()) {
+                    throw new ResourceNotFoundException("No se encontraron las discapacidades.");
+                }
+                if (alumnoDto.getDetalleDiscap().isEmpty()) {
+                    throw new BusinessLogicException("Se necesita al menos un detalle de la discapacidad.");
+                }
+
+                alumno.setDiscapacidad(true);
+                alumno.setDetalleDiscap(alumnoDto.getDetalleDiscap());
+                alumno.setDiscapacidades(discapacidades);
+            } else {
+                alumno.setDiscapacidad(false);
+                alumno.setDetalleDiscap(null);
+                alumno.setDiscapacidades(Collections.emptyList());
+            }
+
             alumnoRepository.save(alumno);
     }
 
