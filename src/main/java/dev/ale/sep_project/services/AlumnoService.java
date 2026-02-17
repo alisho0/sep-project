@@ -229,7 +229,7 @@ public class AlumnoService {
 
     // Creo que puedo utilizar el DTO de creación, tiene la misma estructura, solo
     // habría que sacarle la lista de tutores, o adaptarla para no mandar nada
-    public void actualizarAlumno(Long id, AlumnoUpdateDTO alumnoDto) {
+    public AlumnoDetalleDTO actualizarAlumno(Long id, AlumnoUpdateDTO alumnoDto) {
             Alumno alumno = alumnoRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Alumno", id));
             alumno.setNombre(alumnoDto.getNombre());
             alumno.setApellido(alumnoDto.getApellido());
@@ -255,6 +255,17 @@ public class AlumnoService {
             }
 
             alumnoRepository.save(alumno);
+            return AlumnoDetalleDTO.builder()
+                    .id(alumno.getId())
+                    .dni(alumno.getDni())
+                    .nombre(alumno.getNombre())
+                    .apellido(alumno.getApellido())
+                    .domicilio(alumno.getDomicilio())
+                    .discapacidades(alumno.getDiscapacidades().stream()
+                            .map(d -> new DiscapacidadesListDTO(d.getId(), d.getNombre()))
+                            .toList())
+                    .detalleDiscap(alumno.getDetalleDiscap())
+                    .build();
     }
 
     @Transactional

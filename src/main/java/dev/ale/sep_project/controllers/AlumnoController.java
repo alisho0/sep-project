@@ -69,8 +69,8 @@ public class AlumnoController {
     @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR')")
     @PutMapping("/actualizar/{id}")
     public ResponseEntity<?> actualizarAlumno(@PathVariable Long id, @RequestBody AlumnoUpdateDTO alumnoDto) {
-        alumnoService.actualizarAlumno(id, alumnoDto);
-        return ResponseEntity.ok("Alumno actualizado correctamente");
+        AlumnoDetalleDTO alu = alumnoService.actualizarAlumno(id, alumnoDto);
+        return ResponseEntity.ok(alu);
 
     }
 
