@@ -14,4 +14,5 @@ public class ObservacionDTO {
     private String nombreUsuario;
     private LocalDate fecha;
     private String alumno;
+    private String motivo;
 }

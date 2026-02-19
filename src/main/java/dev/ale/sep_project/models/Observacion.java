@@ -24,4 +24,7 @@ public class Observacion {
     @ManyToOne
     @JoinColumn(name = "registroAlumno_id")
     private RegistroAlumno registroAlumno;
+
+    @Enumerated(EnumType.STRING)
+    private Motivo motivo;
 }

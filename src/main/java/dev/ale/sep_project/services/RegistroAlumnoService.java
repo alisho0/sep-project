@@ -117,6 +117,7 @@ public class RegistroAlumnoService {
                             .contenido(observacion.getContenido())
                             .nombreUsuario(observacion.getUsuario() != null ? observacion.getUsuario().getUsername() : "Sin usuario")
                             .fecha(observacion.getFecha())
+                            .motivo(observacion.getMotivo() != null ? observacion.getMotivo().name() : "S/M")
                             .build())
                         .collect(Collectors.toList()))
                 .build();

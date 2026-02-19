@@ -48,6 +48,7 @@ public class ObservacionService {
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario", userId));
 
         Observacion observacion = new Observacion();
+        observacion.setMotivo(observacionDTO.getMotivo());
         observacion.setContenido(observacionDTO.getContenido());
         observacion.setFecha(observacionDTO.getFecha());
         observacion.setRegistroAlumno(registro);
@@ -64,6 +65,7 @@ public class ObservacionService {
                 .nombreUsuario(usuario.getUsername())
                 .alumno(observacion.getRegistroAlumno().getAlumno().getNombre() + " " + observacion.getRegistroAlumno().getAlumno().getApellido() )
                 .fecha(observacion.getFecha())
+                .motivo(observacion.getMotivo() != null ? observacion.getMotivo().name() : "S/M")
                 .build();
     }
 
@@ -75,7 +77,8 @@ public class ObservacionService {
             .id(observacion.getId())
             .contenido(observacion.getContenido())
             .fecha(observacion.getFecha())
-            .nombreUsuario("John Doe")
+            .nombreUsuario(observacion.getUsuario() != null ? observacion.getUsuario().getUsername() : "Sin usuario")
+            .motivo(observacion.getMotivo() != null ? observacion.getMotivo().name() : "S/M")
             // .nombreUsuario(observacion.getUsuario().getMaestro().getNombre() + " " + observacion.getUsuario().getMaestro().getApellido()) // TODO: Obtener nombre real del usuario
             .build();
     }
@@ -103,6 +106,7 @@ public class ObservacionService {
                                 //.nombreUsuario(o.getUsuario().getMaestro().getNombre() + " " + o.getUsuario().getMaestro().getApellido())
                                 .nombreUsuario(o.getUsuario() != null ? o.getUsuario().getUsername() : "Sin usuario")
                                 .alumno(o.getRegistroAlumno().getAlumno().getNombre() + " " + o.getRegistroAlumno().getAlumno().getApellido())
+                                .motivo(o.getMotivo() != null ? o.getMotivo().name() : "S/M")
                                 .build()
                         ))
                 .toList();
