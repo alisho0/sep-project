@@ -25,6 +25,7 @@ public class RegistroAlumno {
     private Alumno alumno;
     
     @OneToMany(mappedBy = "registroAlumno", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OrderBy("fecha DESC")
     private List<Observacion> observaciones;
     
     @ManyToOne

@@ -1,6 +1,7 @@
 package dev.ale.sep_project.models;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import jakarta.persistence.*;
 import lombok.Data;
@@ -16,7 +17,7 @@ public class Observacion {
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
-    private LocalDate fecha;
+    private LocalDateTime fecha;
 
     @Column(name = "contenido", columnDefinition = "TEXT")
     private String contenido;

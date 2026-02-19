@@ -1,6 +1,7 @@
 package dev.ale.sep_project.dtos.observaciones;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import lombok.Builder;
 import lombok.Data;
@@ -12,7 +13,7 @@ public class ObservacionDTO {
     private Long idAlumno;
     private String contenido;
     private String nombreUsuario;
-    private LocalDate fecha;
+    private LocalDateTime fecha;
     private String alumno;
     private String motivo;
 }
