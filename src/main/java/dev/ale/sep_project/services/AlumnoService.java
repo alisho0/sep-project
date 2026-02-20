@@ -35,6 +35,7 @@ public class AlumnoService {
     private final GradoService gradoService;
     private final CicloGradoService cicloGradoService;
     private final DiscapacidadRepository discapacidadRepository;
+    private final ActividadService actividadService;
 
     @Transactional
     public AlumnoResponseDTO crearAlumno(AlumnoCreateDTO alumnoDto) {
@@ -101,7 +102,11 @@ public class AlumnoService {
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("No se encontraron registros"));
 
-            return AlumnoResponseDTO.builder()
+        // Registro la actividad
+        actividadService.registrarActividad("Se creó el alumno: " + (alumno.getNombre() + " " + alumno.getApellido()), "ALUMNO");
+
+
+        return AlumnoResponseDTO.builder()
                 .id(alumno.getId())
                 .nombre(alumno.getNombre())
                 .apellido(alumno.getApellido())
@@ -222,9 +227,13 @@ public class AlumnoService {
             
             // 3. Guardar el alumno sin sus relaciones
             alumnoRepository.save(alumno);
-            
+
             // 4. Ahora sí podemos eliminar el alumno
-            alumnoRepository.delete(alumno);
+        alumnoRepository.delete(alumno);
+
+        // Registro la actividad
+        actividadService.registrarActividad("Se eliminó el alumno: " + (alumno.getNombre() + " " + alumno.getApellido()), "ALUMNO");
+
     }
 
     // Creo que puedo utilizar el DTO de creación, tiene la misma estructura, solo

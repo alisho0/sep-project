@@ -30,6 +30,7 @@ public class CicloGradoService {
     private final UsuarioRepository usuarioRepository;
     private final AlumnoRepository alumnoRepository;
     private final RegistroAlumnoRepository registroAlumnoRepository;
+    private final ActividadService actividadService;
 
     public void crearCiclo(CicloCreateDTO cicloDto) {
         GradoSeccionTurno grado = gradoSeccionTurnoRepository.findById(cicloDto.getId_grado_seccion_grado())
@@ -236,6 +237,9 @@ public class CicloGradoService {
                     .build();
             RegistroAlumno r = registroAlumnoRepository.save(registroAlumno);
 
+            // Registro la actividad
+            actividadService.registrarActividad("Se creó el registro " + registroAlumno.getFechaInicio().getYear() + " para el alumno " + (registroAlumno.getAlumno().getNombre() + " " + registroAlumno.getAlumno().getApellido()), "REGISTRO");
+
             return AlumnoInscriptoDTO.builder()
                     .id(alumno.getId())
                     .nombre(alumno.getNombre() + " " + alumno.getApellido())
@@ -267,5 +271,7 @@ public class CicloGradoService {
             throw new BusinessLogicException("No se puede desvincular un alumno de un ciclo cerrado.");
         }
         registroAlumnoRepository.delete(registroAlumno);
+        // Registro la actividad
+        actividadService.registrarActividad("Se eliminó el registro " + registroAlumno.getFechaInicio().getYear() + " para el alumno " + (registroAlumno.getAlumno().getNombre() + " " + registroAlumno.getAlumno().getApellido()), "REGISTRO");
     }
 }

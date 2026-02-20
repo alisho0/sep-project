@@ -33,6 +33,7 @@ public class RegistroAlumnoService {
     private final CicloGradoRepository cicloGradoRepository;
     private final CicloGradoService cicloGradoService;
     private final GradoService gradoService;
+    private final ActividadService actividadService;
 
     @Transactional
     public RegistroAniosDTO crearRegistro(RegistroCreateDTO registroAlumno) {
@@ -72,6 +73,9 @@ public class RegistroAlumnoService {
         registroNuevo.setFechaInicio(LocalDate.now());
 
         RegistroAlumno r = registroAlumnoRepository.save(registroNuevo);
+        // Registro la actividad
+        actividadService.registrarActividad("Se creó el registro " + r.getFechaInicio().getYear() + " para el alumno " + (alumno.getNombre() + " " + alumno.getApellido()), "REGISTRO");
+
         return RegistroAniosDTO.builder()
                 .id(r.getId())
                 .anio(ciclo.getAnio())
@@ -90,7 +94,11 @@ public class RegistroAlumnoService {
         if (!registroAlumnoRepository.existsById(id)) {
             throw new ResourceNotFoundException("Registro", id);
         }
-        registroAlumnoRepository.deleteById(id);
+        RegistroAlumno r = registroAlumnoRepository.findById(id)
+                        .orElseThrow(() -> new ResourceNotFoundException("Registro", id));
+        registroAlumnoRepository.delete(r);
+        // Registro la actividad
+        actividadService.registrarActividad("Se eliminó el registro " + r.getFechaInicio().getYear() + " para el alumno " + (r.getAlumno().getNombre() + " " + r.getAlumno().getApellido()), "REGISTRO");
     }
 
     public List<RegistroAlumno> obtenerRegistrosPorAlumno(Long alumnoId) { // Pendiente

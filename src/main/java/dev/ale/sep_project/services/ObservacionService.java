@@ -90,6 +90,8 @@ public class ObservacionService {
             throw new BusinessLogicException("No se puede eliminar una observación de un ciclo cerrado.");
         }
         observacionRepository.delete(observacion);
+        // Registro la actividad
+        actividadService.registrarActividad("Se eliminó una observación para el alumno " + (observacion.getRegistroAlumno().getAlumno().getNombre() + " " + observacion.getRegistroAlumno().getAlumno().getApellido()), "OBSERVACION");
     }
 
     public List<ObservacionDTO> listarObservacionesPorCicloGrado (Long idCiclo) {

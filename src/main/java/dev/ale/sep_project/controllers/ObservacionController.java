@@ -32,7 +32,6 @@ public class ObservacionController {
     @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR', 'MAESTRO')")
     @PostMapping("/crear")
     public ResponseEntity<?> crearObservacion(@RequestBody ObservacionCreateDTO observacionDTO) {
-        System.out.println(observacionDTO);
         return ResponseEntity.ok(observacionService.nuevaObservacion(observacionDTO));
     }
 
