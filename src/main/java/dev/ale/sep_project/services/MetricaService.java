@@ -1,6 +1,7 @@
 package dev.ale.sep_project.services;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
 import java.util.stream.Collectors;
@@ -27,7 +28,8 @@ public class MetricaService {
 
     public Long observacionesRecientes(Long dias) {
         LocalDate fechaLimite = LocalDate.now().minusDays(dias);
-        return observacionRepository.countByFechaAfter(fechaLimite);
+        LocalDateTime fechaLimiteDateTime = fechaLimite.atStartOfDay();
+        return observacionRepository.countByFechaAfter(fechaLimiteDateTime);
     }
 
     public Long alumnosTotales() {

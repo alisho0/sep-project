@@ -103,7 +103,8 @@ public class AlumnoService {
                 .orElseThrow(() -> new ResourceNotFoundException("No se encontraron registros"));
 
         // Registro la actividad
-        actividadService.registrarActividad("Se creó el alumno: " + (alumno.getNombre() + " " + alumno.getApellido()), "ALUMNO");
+        actividadService.registrarActividad("Se creó el alumno: " + (alumno.getNombre() + " " + alumno.getApellido()), "ALUMNO",
+                TipoActividad.CREACION, TipoEntidad.ALUMNO, alumno.getId());
 
 
         return AlumnoResponseDTO.builder()
@@ -232,7 +233,8 @@ public class AlumnoService {
         alumnoRepository.delete(alumno);
 
         // Registro la actividad
-        actividadService.registrarActividad("Se eliminó el alumno: " + (alumno.getNombre() + " " + alumno.getApellido()), "ALUMNO");
+        actividadService.registrarActividad("Se eliminó el alumno: " + (alumno.getNombre() + " " + alumno.getApellido()), "ALUMNO",
+                TipoActividad.ELIMINACION, TipoEntidad.ALUMNO, alumno.getId());
 
     }
 

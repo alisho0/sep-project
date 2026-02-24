@@ -6,6 +6,8 @@ import java.util.stream.Collectors;
 
 import dev.ale.sep_project.dtos.usuarios.ActividadDTO;
 import dev.ale.sep_project.exceptions.ResourceNotFoundException;
+import dev.ale.sep_project.models.TipoActividad;
+import dev.ale.sep_project.models.TipoEntidad;
 import dev.ale.sep_project.models.Usuario;
 import dev.ale.sep_project.repository.UsuarioRepository;
 import io.jsonwebtoken.Claims;
@@ -24,7 +26,7 @@ public class ActividadService {
     private final ActividadRepository actividadRepository;
     private final UsuarioRepository usuarioRepository;
 
-    public void registrarActividad(String descripcion, String tipo) {
+    public void registrarActividad(String descripcion, String tipo, TipoActividad tipoActividad, TipoEntidad entidad, Long entidadId) {
 
         Claims claims = (Claims) SecurityContextHolder.getContext().getAuthentication().getDetails();
         Long userId = claims.get("userId", Long.class);
@@ -34,6 +36,9 @@ public class ActividadService {
         Actividad act = Actividad.builder()
             .descripcion(descripcion + " | Autor: " + usuario.getMaestro().getApellido() + " " + usuario.getMaestro().getNombre())
             .tipo(tipo)
+            .tipoActividad(tipoActividad)
+            .entidadId(entidadId)
+            .entidad(entidad)
             .fecha(LocalDateTime.now())
             .usuario(usuario)
             .build();
@@ -50,7 +55,10 @@ public class ActividadService {
                             act.getDescripcion(),
                             act.getTipo(),
                             act.getFecha(),
-                            (act.getUsuario() != null ? act.getUsuario().getMaestro().getNombre() + " " + act.getUsuario().getMaestro().getApellido() : "Usuario desconocido")))
+                            (act.getUsuario() != null ? act.getUsuario().getMaestro().getNombre() + " " + act.getUsuario().getMaestro().getApellido() : "Usuario desconocido"),
+                            act.getTipoActividad() != null ? act.getTipoActividad().name() : "Sin tipo",
+                            act.getEntidad() != null ? act.getEntidad().name() : "Sin entidad",
+                            act.getEntidadId() != null ? act.getEntidadId() : 0))
                     .collect(Collectors.toList());
         } else {
              return actividadRepository.findByUsuarioIdOrderByFechaDesc(usuario.getId(), pageable).getContent()
@@ -59,7 +67,10 @@ public class ActividadService {
                              act.getDescripcion(),
                              act.getTipo(),
                              act.getFecha(),
-                             (act.getUsuario() != null ? act.getUsuario().getMaestro().getNombre() + " " + act.getUsuario().getMaestro().getApellido() : "Usuario desconocido")))
+                             (act.getUsuario() != null ? act.getUsuario().getMaestro().getNombre() + " " + act.getUsuario().getMaestro().getApellido() : "Usuario desconocido"),
+                             act.getTipoActividad() != null ? act.getTipoActividad().name() : "Sin tipo",
+                             act.getEntidad() != null ? act.getEntidad().name() : "Sin entidad",
+                             act.getEntidadId() != null ? act.getEntidadId() : 0))
                      .collect(Collectors.toList());
         }
     }

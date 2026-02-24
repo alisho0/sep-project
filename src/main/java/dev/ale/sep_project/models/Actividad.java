@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity(name = "actividades")
 @Builder
@@ -20,7 +21,17 @@ public class Actividad {
     private Long id;
     private String descripcion;
     private String tipo;
+
+    @CreationTimestamp
     private LocalDateTime fecha;
+
+    @Enumerated(EnumType.STRING)
+    private TipoActividad tipoActividad;
+
+    @Enumerated(EnumType.STRING)
+    private TipoEntidad entidad;
+
+    private Long entidadId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "usuario_id")

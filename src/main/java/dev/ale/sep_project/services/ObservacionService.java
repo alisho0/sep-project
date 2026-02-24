@@ -54,10 +54,11 @@ public class ObservacionService {
         observacion.setRegistroAlumno(registro);
         observacion.setUsuario(usuario);
 
-        // Registro la actividad
-        actividadService.registrarActividad("Nueva observación registrada para " + (registro.getAlumno().getNombre() + " " + registro.getAlumno().getApellido()), "OBSERVACION");
-
         observacionRepository.save(observacion);
+        // Registro la actividad
+        actividadService.registrarActividad("Nueva observación registrada para " + (registro.getAlumno().getNombre() + " " + registro.getAlumno().getApellido()), "OBSERVACION",
+                TipoActividad.CREACION, TipoEntidad.OBSERVACION, observacion.getId());
+
         return ObservacionDTO.builder()
                 .id(observacion.getId())
                 .idAlumno(observacion.getRegistroAlumno().getAlumno().getId())
@@ -91,7 +92,8 @@ public class ObservacionService {
         }
         observacionRepository.delete(observacion);
         // Registro la actividad
-        actividadService.registrarActividad("Se eliminó una observación para el alumno " + (observacion.getRegistroAlumno().getAlumno().getNombre() + " " + observacion.getRegistroAlumno().getAlumno().getApellido()), "OBSERVACION");
+        actividadService.registrarActividad("Se eliminó una observación para el alumno " + (observacion.getRegistroAlumno().getAlumno().getNombre() + " " + observacion.getRegistroAlumno().getAlumno().getApellido()), "OBSERVACION",
+                TipoActividad.ELIMINACION, TipoEntidad.OBSERVACION, observacion.getId());
     }
 
     public List<ObservacionDTO> listarObservacionesPorCicloGrado (Long idCiclo) {

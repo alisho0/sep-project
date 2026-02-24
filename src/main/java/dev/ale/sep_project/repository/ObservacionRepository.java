@@ -1,6 +1,7 @@
 package dev.ale.sep_project.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -10,7 +11,7 @@ import org.springframework.data.repository.query.Param;
 
 public interface ObservacionRepository extends CrudRepository<Observacion, Long> {
 
-    public Long countByFechaAfter(LocalDate fecha);
+    public Long countByFechaAfter(LocalDateTime fecha);
 
     @Query("SELECT COUNT(DISTINCT o) " +
             "FROM Observacion o " +

@@ -238,7 +238,8 @@ public class CicloGradoService {
             RegistroAlumno r = registroAlumnoRepository.save(registroAlumno);
 
             // Registro la actividad
-            actividadService.registrarActividad("Se creó el registro " + registroAlumno.getFechaInicio().getYear() + " para el alumno " + (registroAlumno.getAlumno().getNombre() + " " + registroAlumno.getAlumno().getApellido()), "REGISTRO");
+            actividadService.registrarActividad("Se creó el registro " + registroAlumno.getFechaInicio().getYear() + " para el alumno " + (registroAlumno.getAlumno().getNombre() + " " + registroAlumno.getAlumno().getApellido()), "REGISTRO",
+                    TipoActividad.CREACION, TipoEntidad.REGISTRO, r.getId());
 
             return AlumnoInscriptoDTO.builder()
                     .id(alumno.getId())
@@ -272,6 +273,7 @@ public class CicloGradoService {
         }
         registroAlumnoRepository.delete(registroAlumno);
         // Registro la actividad
-        actividadService.registrarActividad("Se eliminó el registro " + registroAlumno.getFechaInicio().getYear() + " para el alumno " + (registroAlumno.getAlumno().getNombre() + " " + registroAlumno.getAlumno().getApellido()), "REGISTRO");
+        actividadService.registrarActividad("Se eliminó el registro " + registroAlumno.getFechaInicio().getYear() + " para el alumno " + (registroAlumno.getAlumno().getNombre() + " " + registroAlumno.getAlumno().getApellido()), "REGISTRO",
+                TipoActividad.ELIMINACION, TipoEntidad.REGISTRO, registroAlumno.getId());
     }
 }

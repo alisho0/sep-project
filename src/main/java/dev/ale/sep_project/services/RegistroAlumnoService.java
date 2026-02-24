@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import dev.ale.sep_project.exceptions.BusinessLogicException;
 import dev.ale.sep_project.exceptions.ResourceAlreadyExistsException;
-import dev.ale.sep_project.models.GradoSeccionTurno;
+import dev.ale.sep_project.models.*;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -16,9 +16,6 @@ import dev.ale.sep_project.dtos.observaciones.ObservacionDTO;
 import dev.ale.sep_project.dtos.registros.RegistroAniosDTO;
 import dev.ale.sep_project.dtos.registros.RegistroCreateDTO;
 import dev.ale.sep_project.dtos.registros.RegistroRespuestaDTO;
-import dev.ale.sep_project.models.Alumno;
-import dev.ale.sep_project.models.CicloGrado;
-import dev.ale.sep_project.models.RegistroAlumno;
 import dev.ale.sep_project.repository.AlumnoRepository;
 import dev.ale.sep_project.repository.CicloGradoRepository;
 import dev.ale.sep_project.repository.RegistroAlumnoRepository;
@@ -74,7 +71,8 @@ public class RegistroAlumnoService {
 
         RegistroAlumno r = registroAlumnoRepository.save(registroNuevo);
         // Registro la actividad
-        actividadService.registrarActividad("Se creó el registro " + r.getFechaInicio().getYear() + " para el alumno " + (alumno.getNombre() + " " + alumno.getApellido()), "REGISTRO");
+        actividadService.registrarActividad("Se creó el registro " + r.getFechaInicio().getYear() + " para el alumno " + (alumno.getNombre() + " " + alumno.getApellido()), "REGISTRO",
+                TipoActividad.CREACION, TipoEntidad.REGISTRO, r.getId());
 
         return RegistroAniosDTO.builder()
                 .id(r.getId())
@@ -98,7 +96,8 @@ public class RegistroAlumnoService {
                         .orElseThrow(() -> new ResourceNotFoundException("Registro", id));
         registroAlumnoRepository.delete(r);
         // Registro la actividad
-        actividadService.registrarActividad("Se eliminó el registro " + r.getFechaInicio().getYear() + " para el alumno " + (r.getAlumno().getNombre() + " " + r.getAlumno().getApellido()), "REGISTRO");
+        actividadService.registrarActividad("Se eliminó el registro " + r.getFechaInicio().getYear() + " para el alumno " + (r.getAlumno().getNombre() + " " + r.getAlumno().getApellido()), "REGISTRO",
+                TipoActividad.ELIMINACION, TipoEntidad.REGISTRO, r.getId());
     }
 
     public List<RegistroAlumno> obtenerRegistrosPorAlumno(Long alumnoId) { // Pendiente
