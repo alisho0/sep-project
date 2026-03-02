@@ -12,6 +12,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -33,7 +34,14 @@ public class SecurityConfig {
     private final AuthenticationProvider authProvider;
     private final TokenRepository tokenRepository;
 
-        @Bean
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return ((request, response, authException) -> {
+            response.sendError(HttpServletResponse.SC_UNAUTHORIZED, authException.getMessage());
+        });
+    }
+
+    @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("http://localhost:5173"));
@@ -50,11 +58,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
+            .exceptionHandling(httpSecurityExceptionHandlingConfigurer -> {
+                httpSecurityExceptionHandlingConfigurer.authenticationEntryPoint(authenticationEntryPoint());
+            })
             .csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource()))
             .authorizeHttpRequests(authRequest -> 
                 authRequest
-                    .requestMatchers("/auth/login", "/auth/logout", "/auth-debug").permitAll()
+                    .requestMatchers("/auth/login", "/auth/logout", "/auth/refresh", "/auth-debug").permitAll()
                     //.requestMatchers("/usuario/eliminar/{id}", "/grado/listar",
                       //      "/grado/detalle/{id}", "/ciclo/crearCiclo", "/ciclo/{idCiclo}/maestros/{idMaestro}",
                         //    "/ciclo/{idCiclo}/maestros/{idMaestro}").hasAnyRole("ADMIN, DIRECTOR")

@@ -2,8 +2,11 @@ package dev.ale.sep_project.security;
 
 import java.util.List;
 
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.JwtException;
 import jakarta.transaction.Transactional;
 import org.springframework.boot.autoconfigure.security.SecurityProperties.User;
+import org.springframework.security.authentication.AuthenticationCredentialsNotFoundException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -122,22 +125,21 @@ public class AuthService {
         tokenRepository.save(token);
     }
 
-    public AuthResponse refreshToken(final String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            throw new IllegalArgumentException("El encabezado de autorización es inválido");
-        }
-        String refreshToken = authHeader.substring(7);
-        String username = jwtService.extractUsername(refreshToken);
-
-        if (username == null) {
-            throw new IllegalArgumentException("El token es inválido");
+    public AuthResponse refreshToken(final String refreshToken) {
+        String username;
+        try {
+            username = jwtService.extractUsername(refreshToken);
+        } catch (ExpiredJwtException e) {
+            throw new AuthenticationCredentialsNotFoundException("Refresh token expirado", e);
+        } catch (JwtException e) {
+            throw new BadCredentialsException("Refresh token inválido", e);
         }
 
         Usuario user = usuarioRepository.findByUsername(username)
             .orElseThrow(() -> new UsernameNotFoundException("Usuario no encontrado"));
         
         if (!jwtService.isTokenValid(refreshToken, user)) {
-            throw new IllegalArgumentException("El token de actualización no es válido");
+            throw new AuthenticationCredentialsNotFoundException("El token de actualización no es válido");
         }
         
         String newAccessToken = jwtService.generateToken(user);

@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.ExpiredJwtException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
@@ -40,8 +41,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws IOException, ServletException {
 
-                if (request.getServletPath().equals("/auth/login") ||
-                        request.getServletPath().equals("/auth/logout")) {
+                String path = request.getServletPath();
+
+                if (path.equals("/auth/login") ||
+                        path.equals("/auth/logout") ||
+                        path.equals("/auth/refresh")) {
                     filterChain.doFilter(request, response);
                     return;
                 }
@@ -50,13 +54,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 if (authHeader == null || !authHeader.startsWith("Bearer ")) {
                     filterChain.doFilter(request, response);
                     return;
-                    
+
                 }
 
                 final String jwtToken = authHeader.substring(7);
-                final String username = jwtService.extractUsername(jwtToken);
+                String username;
 
-                if (username == null || SecurityContextHolder.getContext().getAuthentication() != null) {
+                try {
+                    username = jwtService.extractUsername(jwtToken);
+                } catch (ExpiredJwtException e) {
                     filterChain.doFilter(request, response);
                     return;
                 }
@@ -71,7 +77,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
                 UserDetails userDetails = userDetailsService.loadUserByUsername(username);
                 final Optional<Usuario> usuario = userRepository.findByUsername(username);
-                
+
                 if (usuario.isEmpty()) {
                     filterChain.doFilter(request, response);
                     return;

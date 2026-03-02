@@ -1,5 +1,7 @@
 package dev.ale.sep_project.security;
 
+import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -13,16 +15,32 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
+import java.time.Duration;
+import java.util.Arrays;
+
 
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
     private final AuthService authService;
+    private final CookieService cookieService;
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
-        return ResponseEntity.ok(authService.login(request));
+        AuthResponse authResponse = authService.login(request);
+        ResponseCookie refreshCookie = ResponseCookie.from("refreshToken", authResponse.getRefreshToken())
+                .httpOnly(true)
+                .secure(false) // ⚠️ en local, debe ser false
+                .sameSite("Lax") // más permisivo en desarrollo
+                .path("/auth")
+                .maxAge(Duration.ofDays(7))
+                .build();
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, refreshCookie.toString())
+                .body(AuthResponse.builder()
+                        .token(authResponse.getToken())
+                        .build());
     }
 
     @PreAuthorize("hasAnyRole('ADMIN', 'DIRECTOR')")
@@ -32,8 +50,16 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<AuthResponse> refresh(@RequestHeader(HttpHeaders.AUTHORIZATION) final String authHeader) {
-        return ResponseEntity.ok(authService.refreshToken(authHeader));
+    public ResponseEntity<AuthResponse> refresh(HttpServletRequest request) {
+        System.out.println("REFRESH ENDPOINT EJECUTADO");
+        System.out.println(Arrays.toString(request.getCookies()));
+        String refreshToken = cookieService.getRefreshToken(request);
+
+        System.out.println("refresh token: " + refreshToken);
+        AuthResponse authResponse = authService.refreshToken(refreshToken);
+        return ResponseEntity.ok(AuthResponse.builder()
+                .token(authResponse.getToken())
+                .build());
     }
 
     @PreAuthorize("hasAnyRole('ADMIN','DIRECTOR')")

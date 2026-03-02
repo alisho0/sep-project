@@ -4,6 +4,7 @@ import java.security.Key;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.UUID;
 import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -46,6 +47,7 @@ public class JwtService {
             .claim("rol", usuario.getRol().name())
             .setIssuedAt(new Date(System.currentTimeMillis()))
             .setExpiration(new Date(System.currentTimeMillis() + expiration))
+            .setId(UUID.randomUUID().toString())
             .signWith(getKey(), SignatureAlgorithm.HS256)
             .compact();
     }
