@@ -10,9 +10,9 @@
 	</parent>
 	<groupId>dev.ale</groupId>
 	<artifactId>sep-project</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>0.0.1</version>
 	<name>sep-project</name>
-	<description>Demo project for Spring Boot</description>
+	<description>Proyecto de gestion escolar</description>
 	<url/>
 	<licenses>
 		<license/>
