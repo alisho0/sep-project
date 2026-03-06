@@ -3,6 +3,7 @@ package dev.ale.sep_project.config;
 import dev.ale.sep_project.models.*;
 import dev.ale.sep_project.repository.*;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import lombok.RequiredArgsConstructor;
@@ -18,12 +19,17 @@ public class DataLoader implements CommandLineRunner {
     private final CicloGradoRepository cicloGradoRepository;
     private final TurnoRepository turnoRepository;
     private final SeccionRepository seccionRepository;
+    private final UsuarioRepository usuarioRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public void run(String... args) throws Exception {
         // Solo cargamos datos si no hay grados en la BD
         if (gradoSeccionTurnoRepository.count() == 0) {
             cargarGrados();
+        }
+        if (usuarioRepository.count() == 0) {
+            crearUsuarios();
         }
     }
 
@@ -36,6 +42,25 @@ public class DataLoader implements CommandLineRunner {
             cicloGradoRepository.save(c);
         });
     }
+
+    private void crearUsuarios() {
+
+        Maestro maestro = new Maestro();
+        maestro.setDni("55111222");
+        maestro.setNombre("John");
+        maestro.setApellido("Doe");
+        maestro.setDomicilio("Mza 14, L34");
+
+        Usuario admin = Usuario.builder()
+                .username("admin")
+                .password(passwordEncoder.encode("123"))
+                .rol(Rol.ADMIN)
+                .maestro(maestro)
+                .build();
+        usuarioRepository.save(admin);
+
+    }
+
     private void cargarGrados() {
         String[] turnos = {"M", "T"};
         String[] secs = {"A", "B", "C"};
