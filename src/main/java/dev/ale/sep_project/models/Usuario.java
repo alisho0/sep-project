@@ -31,7 +31,7 @@ public class Usuario implements UserDetails {
     @OneToMany(mappedBy = "usuario")
     private List<Observacion> observaciones;
 
-    @OneToOne(mappedBy = "usuario", cascade = CascadeType.REMOVE, orphanRemoval = true)
+    @OneToOne(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private Maestro maestro;
 
     @OneToMany(mappedBy = "usuario", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)

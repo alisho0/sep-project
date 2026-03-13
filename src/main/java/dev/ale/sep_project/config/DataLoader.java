@@ -20,6 +20,7 @@ public class DataLoader implements CommandLineRunner {
     private final TurnoRepository turnoRepository;
     private final SeccionRepository seccionRepository;
     private final UsuarioRepository usuarioRepository;
+    private final MaestroRepository maestroRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Override
@@ -29,6 +30,7 @@ public class DataLoader implements CommandLineRunner {
             cargarGrados();
         }
         if (usuarioRepository.count() == 0) {
+            System.out.println("Usuarios en BD: " + usuarioRepository.count());
             crearUsuarios();
         }
     }
@@ -57,6 +59,8 @@ public class DataLoader implements CommandLineRunner {
                 .rol(Rol.ADMIN)
                 .maestro(maestro)
                 .build();
+        maestro.setUsuario(admin);
+        maestroRepository.save(maestro);
         usuarioRepository.save(admin);
 
     }
