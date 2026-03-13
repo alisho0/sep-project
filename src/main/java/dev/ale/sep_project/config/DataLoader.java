@@ -47,22 +47,24 @@ public class DataLoader implements CommandLineRunner {
 
     private void crearUsuarios() {
 
+        Usuario admin = Usuario.builder()
+                .username("admin")
+                .password(passwordEncoder.encode("123"))
+                .rol(Rol.ADMIN)
+                .build();
+
+        usuarioRepository.save(admin);
+
         Maestro maestro = new Maestro();
         maestro.setDni("55111222");
         maestro.setNombre("John");
         maestro.setApellido("Doe");
         maestro.setDomicilio("Mza 14, L34");
 
-        Usuario admin = Usuario.builder()
-                .username("admin")
-                .password(passwordEncoder.encode("123"))
-                .rol(Rol.ADMIN)
-                .maestro(maestro)
-                .build();
         maestro.setUsuario(admin);
-        maestroRepository.save(maestro);
-        usuarioRepository.save(admin);
+        admin.setMaestro(maestro);
 
+        maestroRepository.save(maestro);
     }
 
     private void cargarGrados() {
